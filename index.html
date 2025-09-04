@@ -19,7 +19,7 @@
       font-family: 'Comic Sans MS', cursive, sans-serif;
       background: #e6f7ff;
       overflow: hidden;
-      touch-action: none;
+      touch-action: manipulation;
     }
 
     #loading {
@@ -99,53 +99,68 @@
      id="smartLessaBtn" target="_blank">👉 Дивись більше на @SmartLessa</a>
 
   <a-scene embedded
-    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono"
+    arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best"
     vr-mode-ui="enabled: false"
     renderer="antialias: true; alpha: true; background: transparent"
   >
     <a-entity camera></a-entity>
-
-    <!-- Контейнер у AR-просторі -->
-    <a-entity id="floor" position="0 0 0"></a-entity>
+    <a-entity id="floor"></a-entity>
   </a-scene>
 
   <script>
     const loadingScreen = document.getElementById('loading');
     const hint = document.getElementById('hint');
     const floor = document.querySelector('#floor');
-
     let stepCount = 0;
 
+    // Показуємо підказку після кліку на завантаження
     loadingScreen.addEventListener('click', () => {
       loadingScreen.style.display = 'none';
-      hint.textContent = '👆 Тикни пальцем — залиш слід знань!';
+      setTimeout(() => {
+        hint.textContent = '👆 Тикни пальцем — залиш слід знань!';
+      }, 500);
     });
 
+    // Обробка кліку на сцену
     document.querySelector('a-scene').addEventListener('click', (e) => {
-      if (e.target.tagName === 'A-SCENE') {
+      if (e.target.tagName === 'A-SCENE' && window.THREE) {
         createFootprint(e);
       }
+    });
+
+    // Обробка помилки камери
+    document.querySelector('a-scene').addEventListener('webcam-error', (event) => {
+      console.error('Помилка камери:', event.detail);
+      alert('Не вдалося отримати доступ до камери. Перевір дозволи та спробуй ще раз.');
     });
 
     function createFootprint(event) {
       const scene = document.querySelector('a-scene');
       const camera = scene.camera;
+      const canvas = scene.canvas;
+
+      if (!window.THREE || !camera) {
+        console.warn("THREE або камера ще не готові");
+        return;
+      }
+
       const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
 
-      const rect = scene.canvas.getBoundingClientRect();
-      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-      raycaster.setFromCamera({ x, y }, camera);
+      raycaster.setFromCamera(mouse, camera);
 
-      // Створюємо площину перед камерою (не на z=0, а в AR-просторі)
-      const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -0.5); // z = -0.5
+      // Площина на відстані 0.5 од. від камери
+      const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -0.5);
       const point = new THREE.Vector3();
       const intersection = raycaster.ray.intersectPlane(plane, point);
 
       if (intersection) {
         const isRight = stepCount % 2 === 0;
-        const src = isRight ? 'footprint.png' : 'footprint1.png'; // використовуй .png
+        const src = isRight ? 'footprint.png' : 'footprint1.png'; // переконайся, що ці файли є
 
         const footprint = document.createElement('a-plane');
         footprint.setAttribute('width', 0.2);
@@ -153,13 +168,13 @@
         footprint.setAttribute('position', `${intersection.x} ${intersection.y} -0.5`);
         footprint.setAttribute('rotation', '-90 0 0');
         footprint.setAttribute('material', `src: ${src}; transparent: true; side: double`);
-        footprint.setAttribute('animation', 'property: scale; to: 0.8 0.8 0.8; dur: 1000; easing: easeOutElastic');
+        footprint.setAttribute('animation', 'property: scale; to: 1.2 1.2 1.2; dur: 800; easing: easeOutElastic');
 
         floor.appendChild(footprint);
         stepCount++;
 
         if (stepCount === 5) {
-          setTimeout(showReward, 500);
+          setTimeout(showReward, 600);
         }
       }
     }
@@ -173,14 +188,15 @@
       reward.setAttribute('animation', 'property: scale; to: 1.5 1.5 1.5; dur: 1000; easing: easeOutElastic');
       floor.appendChild(reward);
 
-      confetti({
-        particleCount: 150,
-        spread: 90,
-        origin: { y: 0.6 },
-        colors: ['#ff0044', '#ffa500', '#ffff00', '#00ff00', '#0066ff']
-      });
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 150,
+          spread: 90,
+          origin: { y: 0.6 },
+          colors: ['#ff0044', '#ffa500', '#ffff00', '#00ff00', '#0066ff']
+        });
+      }
     }
   </script>
 </body>
 </html>
-
