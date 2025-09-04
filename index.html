@@ -22,7 +22,6 @@
       touch-action: none;
     }
 
-    /* Екран запуску */
     #loading {
       position: fixed;
       top: 0;
@@ -53,7 +52,6 @@
       100% { transform: scale(1); }
     }
 
-    /* Підказка */
     #hint {
       position: fixed;
       top: 20px;
@@ -67,7 +65,6 @@
       z-index: 10;
     }
 
-    /* Кнопка YouTube */
     #smartLessaBtn {
       position: fixed;
       bottom: 15px;
@@ -83,7 +80,6 @@
       box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
 
-    /* AR Сцена */
     a-scene {
       width: 100%;
       height: 100vh;
@@ -92,54 +88,45 @@
 </head>
 <body>
 
-  <!-- Екран: клацни, щоб увімкнути -->
   <div id="loading">
     👣 Сліди знань<br>
     <span>👉 Клацни, щоб увімкнути AR</span>
   </div>
 
-  <!-- Підказка -->
   <div id="hint">👆 Тикни пальцем — залиш слід знань!</div>
 
-  <!-- Кнопка YouTube -->
   <a href="https://youtube.com/playlist?list=PL6UDFwT9TzFxsVdFiEBsQ9yFpcYRPOpfO&si=IyXv1SkdPyvhcW7Z" 
      id="smartLessaBtn" target="_blank">👉 Дивись більше на @SmartLessa</a>
 
-  <!-- AR Сцена -->
   <a-scene embedded
     arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono"
     vr-mode-ui="enabled: false"
     renderer="antialias: true; alpha: true; background: transparent"
   >
-    <!-- Камера -->
     <a-entity camera></a-entity>
 
-    <!-- Контейнер для слідів -->
-    <a-entity id="floor"></a-entity>
+    <!-- Контейнер у AR-просторі -->
+    <a-entity id="floor" position="0 0 0"></a-entity>
   </a-scene>
 
   <script>
-    // --- Змінні ---
     const loadingScreen = document.getElementById('loading');
     const hint = document.getElementById('hint');
-    const floor = document.getElementById('floor');
+    const floor = document.querySelector('#floor');
 
     let stepCount = 0;
 
-    // --- Клацни, щоб увімкнути ---
     loadingScreen.addEventListener('click', () => {
       loadingScreen.style.display = 'none';
       hint.textContent = '👆 Тикни пальцем — залиш слід знань!';
     });
 
-    // --- Натискання на екран ---
     document.querySelector('a-scene').addEventListener('click', (e) => {
       if (e.target.tagName === 'A-SCENE') {
         createFootprint(e);
       }
     });
 
-    // --- Створення сліду ---
     function createFootprint(event) {
       const scene = document.querySelector('a-scene');
       const camera = scene.camera;
@@ -151,23 +138,24 @@
 
       raycaster.setFromCamera({ x, y }, camera);
 
-      const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+      // Створюємо площину перед камерою (не на z=0, а в AR-просторі)
+      const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -0.5); // z = -0.5
       const point = new THREE.Vector3();
       const intersection = raycaster.ray.intersectPlane(plane, point);
 
       if (intersection) {
-        // Чергуємо сліди: правий (footprint.png) → лівий (footprint1.PNG)
-        const src = stepCount % 2 === 0 ? 'footprint.png' : 'footprint1.PNG';
+        const isRight = stepCount % 2 === 0;
+        const src = isRight ? 'footprint.png' : 'footprint1.png'; // використовуй .png
 
         const footprint = document.createElement('a-plane');
         footprint.setAttribute('width', 0.2);
         footprint.setAttribute('height', 0.1);
-        footprint.setAttribute('position', `${intersection.x} ${intersection.y} 0`);
+        footprint.setAttribute('position', `${intersection.x} ${intersection.y} -0.5`);
         footprint.setAttribute('rotation', '-90 0 0');
         footprint.setAttribute('material', `src: ${src}; transparent: true; side: double`);
         footprint.setAttribute('animation', 'property: scale; to: 0.8 0.8 0.8; dur: 1000; easing: easeOutElastic');
-        floor.appendChild(footprint);
 
+        floor.appendChild(footprint);
         stepCount++;
 
         if (stepCount === 5) {
@@ -176,13 +164,12 @@
       }
     }
 
-    // --- Показуємо подарунок ---
     function showReward() {
       hint.textContent = '🎉 Молодець! Ти знайшов скарб знань!';
 
       const reward = document.createElement('a-entity');
       reward.setAttribute('text', 'value: Молодець! 🎉\nСкарб знань відкрито!; align: center; color: #d1006c; width: 3;');
-      reward.setAttribute('position', '0 1.5 0');
+      reward.setAttribute('position', '0 1.5 -1');
       reward.setAttribute('animation', 'property: scale; to: 1.5 1.5 1.5; dur: 1000; easing: easeOutElastic');
       floor.appendChild(reward);
 
