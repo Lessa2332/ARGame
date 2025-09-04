@@ -6,9 +6,9 @@
   <title>Сліди знань — AR для дітей</title>
 
   <!-- A-Frame -->
-  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <script src="https://unpkg.com/aframe@1.6.0/dist/aframe.min.js"></script>
   <!-- AR.js -->
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <script src="https://unpkg.com/@ar-js-org/ar.js@2.2.2/aframe/build/aframe-ar.js"></script>
   <!-- Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 
@@ -99,13 +99,11 @@
      id="smartLessaBtn" target="_blank">👉 Дивись більше на @SmartLessa</a>
 
   <a-scene embedded
-    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono"
+    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono; trackingMethod: best; patternRatio: 0.5; maxDetectionRate: 60;"
     vr-mode-ui="enabled: false"
-    renderer="antialias: true; alpha: true; background: transparent"
+    renderer="antialias: true; alpha: true"
   >
     <a-entity camera></a-entity>
-
-    <!-- Контейнер у AR-просторі -->
     <a-entity id="floor" position="0 0 0"></a-entity>
   </a-scene>
 
@@ -116,30 +114,31 @@
 
     let stepCount = 0;
 
-    // Виправлення: додаємо обробку подій для мобільних пристроїв
     loadingScreen.addEventListener('click', startAR);
     loadingScreen.addEventListener('touchstart', startAR);
 
-    function startAR() {
+    function startAR(e) {
+      e.preventDefault();
       loadingScreen.style.display = 'none';
       hint.textContent = '👆 Тикни пальцем — залиш слід знань!';
     }
 
-    // Виправлення: додаємо обробку подій для сцени
     const scene = document.querySelector('a-scene');
+    scene.addEventListener('loaded', () => {
+      console.log('Сцена завантажена, камера готова:', scene.camera);
+    });
     scene.addEventListener('click', handleSceneClick);
     scene.addEventListener('touchstart', handleSceneClick);
 
     function handleSceneClick(e) {
+      e.preventDefault();
       if (e.target.tagName === 'A-SCENE' || e.target.closest('a-scene')) {
+        console.log('Подія клік/тач:', e);
         createFootprint(e);
       }
     }
 
     function createFootprint(event) {
-      const scene = document.querySelector('a-scene');
-      
-      // Виправлення: перевірка чи камера готова
       if (!scene.camera) {
         console.log('Камера ще не готова');
         return;
@@ -151,7 +150,6 @@
       const rect = scene.canvas.getBoundingClientRect();
       let clientX, clientY;
 
-      // Виправлення: обробка як кліків, так і тач-подій
       if (event.touches && event.touches.length > 0) {
         clientX = event.touches[0].clientX;
         clientY = event.touches[0].clientY;
@@ -165,27 +163,25 @@
 
       raycaster.setFromCamera({ x, y }, camera);
 
-      // Виправлення: змінено позицію площини для кращого відображення
-      const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -1); // z = -1
+      const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -0.5);
       const point = new THREE.Vector3();
       const intersection = raycaster.ray.intersectPlane(plane, point);
 
       if (intersection) {
+        console.log('Точка перетину:', intersection);
         const isRight = stepCount % 2 === 0;
-        // Виправлення: використання онлайн зображень для демонстрації
-        const src = isRight ? 
-          'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Right_footprint.svg/120px-Right_footprint.svg.png' : 
-          'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Left_footprint.svg/120px-Left_footprint.svg.png';
+        const src = isRight ? './footprint1.png' : './footprint.png';
 
         const footprint = document.createElement('a-plane');
-        footprint.setAttribute('width', 0.3);
-        footprint.setAttribute('height', 0.2);
-        footprint.setAttribute('position', `${intersection.x} ${intersection.y} -1`);
+        footprint.setAttribute('width', 0.5);
+        footprint.setAttribute('height', 0.3);
+        footprint.setAttribute('position', `${intersection.x} ${intersection.y} -0.5`);
         footprint.setAttribute('rotation', '-90 0 0');
         footprint.setAttribute('material', `src: ${src}; transparent: true; side: double`);
         footprint.setAttribute('animation', 'property: scale; to: 1 1 1; dur: 1000; easing: easeOutElastic');
 
         floor.appendChild(footprint);
+        console.log('Слід створено:', footprint);
         stepCount++;
 
         if (stepCount === 5) {
@@ -205,7 +201,6 @@
       reward.setAttribute('animation', 'property: scale; to: 1.5 1.5 1.5; dur: 1000; easing: easeOutElastic');
       floor.appendChild(reward);
 
-      // Виправлення: перевірка чи доступна функція confetti
       if (typeof confetti === 'function') {
         confetti({
           particleCount: 150,
@@ -213,13 +208,15 @@
           origin: { y: 0.6 },
           colors: ['#ff0044', '#ffa500', '#ffff00', '#00ff00', '#0066ff']
         });
+      } else {
+        console.error('Конфетті не завантажено');
       }
     }
 
-    // Виправлення: додаємо обробку помилок завантаження скриптів
     window.addEventListener('error', function(e) {
       console.error('Помилка завантаження:', e.error);
     });
   </script>
 </body>
 </html>
+
