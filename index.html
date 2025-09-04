@@ -1,3 +1,4 @@
+  
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -128,6 +129,7 @@
 
     const scene = document.querySelector('a-scene');
     
+    // Перевірка готовності сцени
     scene.addEventListener('loaded', function() {
       console.log('Сцена завантажена');
     });
@@ -169,7 +171,7 @@
 
       raycaster.setFromCamera({ x, y }, camera);
 
-      // Використовуємо горизонтальну площину (y = 0)
+      // Горизонтальна площина (підлога)
       const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
       const point = new THREE.Vector3();
       const intersection = raycaster.ray.intersectPlane(plane, point);
@@ -178,14 +180,13 @@
         console.log('Точка перетину:', intersection);
         
         const isRight = stepCount % 2 === 0;
-        // Використовуємо ваші локальні файли
         const src = isRight ? './footprint1.png' : './footprint.png';
 
         const footprint = document.createElement('a-entity');
         footprint.setAttribute('geometry', 'primitive: plane; width: 0.3; height: 0.2');
+        footprint.setAttribute('material', `src: ${src}; transparent: true; side: double`);
         footprint.setAttribute('position', `${intersection.x} 0.01 ${intersection.z}`);
         footprint.setAttribute('rotation', '-90 0 0');
-        footprint.setAttribute('material', `src: ${src}; transparent: true; side: double`);
         
         // Анімація появи
         footprint.setAttribute('animation', {
