@@ -156,8 +156,8 @@
       const intersection = raycaster.ray.intersectPlane(plane, point);
 
       if (intersection) {
-        const isRightFoot = stepCount % 2 === 0;
-        const src = isRightFoot ? 'footprint.png' : 'footprint1.PNG';
+        // Чергуємо сліди: правий (footprint.png) → лівий (footprint1.PNG)
+        const src = stepCount % 2 === 0 ? 'footprint.png' : 'footprint1.PNG';
 
         const footprint = document.createElement('a-plane');
         footprint.setAttribute('width', 0.2);
@@ -196,3 +196,4 @@
   </script>
 </body>
 </html>
+
