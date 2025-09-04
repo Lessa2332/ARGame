@@ -129,11 +129,12 @@
     });
     scene.addEventListener('click', handleSceneClick);
     scene.addEventListener('touchstart', handleSceneClick);
+    scene.addEventListener('touchmove', handleSceneClick); // Додатковий обробник
 
     function handleSceneClick(e) {
       e.preventDefault();
+      console.log('Подія клік/тач:', e.type, e);
       if (e.target.tagName === 'A-SCENE' || e.target.closest('a-scene')) {
-        console.log('Подія клік/тач:', e);
         createFootprint(e);
       }
     }
@@ -163,19 +164,19 @@
 
       raycaster.setFromCamera({ x, y }, camera);
 
-      const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -0.5);
+      const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -0.2); // Змінено з -0.5 на -0.2 для кращого перетину
       const point = new THREE.Vector3();
       const intersection = raycaster.ray.intersectPlane(plane, point);
 
       if (intersection) {
-        console.log('Точка перетину:', intersection);
+        console.log('Точка перетину:', intersection.x, intersection.y, intersection.z);
         const isRight = stepCount % 2 === 0;
         const src = isRight ? './footprint1.png' : './footprint.png';
 
         const footprint = document.createElement('a-plane');
         footprint.setAttribute('width', 0.5);
         footprint.setAttribute('height', 0.3);
-        footprint.setAttribute('position', `${intersection.x} ${intersection.y} -0.5`);
+        footprint.setAttribute('position', `${intersection.x} ${intersection.y} -0.2`);
         footprint.setAttribute('rotation', '-90 0 0');
         footprint.setAttribute('material', `src: ${src}; transparent: true; side: double`);
         footprint.setAttribute('animation', 'property: scale; to: 1 1 1; dur: 1000; easing: easeOutElastic');
@@ -188,7 +189,7 @@
           setTimeout(showReward, 500);
         }
       } else {
-        console.log('Немає перетину з площиною');
+        console.log('Немає перетину з площиною, x:', x, 'y:', y);
       }
     }
 
@@ -219,4 +220,3 @@
   </script>
 </body>
 </html>
-
