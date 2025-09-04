@@ -1,5 +1,4 @@
-  
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="uk">
 <head>
   <meta charset="utf-8">
@@ -114,6 +113,8 @@
     const floor = document.querySelector('#floor');
 
     let stepCount = 0;
+    let lastFootprintPosition = null;
+    const MIN_STEP_DISTANCE = 0.3; // 30 см між слідами
 
     function startAR(e) {
       e.preventDefault();
@@ -129,7 +130,6 @@
 
     const scene = document.querySelector('a-scene');
     
-    // Перевірка готовності сцени
     scene.addEventListener('loaded', function() {
       console.log('Сцена завантажена');
     });
@@ -177,13 +177,22 @@
       const intersection = raycaster.ray.intersectPlane(plane, point);
 
       if (intersection) {
+        // Перевірка відстані від останнього сліду
+        if (lastFootprintPosition) {
+          const distance = intersection.distanceTo(lastFootprintPosition);
+          if (distance < MIN_STEP_DISTANCE) {
+            console.log('Занадто близько до попереднього сліду');
+            return;
+          }
+        }
+
         console.log('Точка перетину:', intersection);
         
         const isRight = stepCount % 2 === 0;
         const src = isRight ? './footprint1.png' : './footprint.png';
 
         const footprint = document.createElement('a-entity');
-        footprint.setAttribute('geometry', 'primitive: plane; width: 0.3; height: 0.2');
+        footprint.setAttribute('geometry', 'primitive: plane; width: 0.25; height: 0.15');
         footprint.setAttribute('material', `src: ${src}; transparent: true; side: double`);
         footprint.setAttribute('position', `${intersection.x} 0.01 ${intersection.z}`);
         footprint.setAttribute('rotation', '-90 0 0');
@@ -193,13 +202,24 @@
           property: 'scale',
           from: '0 0 0',
           to: '1 1 1',
-          dur: 800,
+          dur: 600,
           easing: 'easeOutElastic'
         });
 
         floor.appendChild(footprint);
         console.log('Слід створено:', footprint);
+        
+        // Зберігаємо позицію останнього сліду
+        lastFootprintPosition = intersection.clone();
         stepCount++;
+
+        // Видаляємо перший слід, якщо їх більше 10
+        if (stepCount > 10) {
+          const firstFootprint = floor.firstChild;
+          if (firstFootprint) {
+            floor.removeChild(firstFootprint);
+          }
+        }
 
         if (stepCount === 5) {
           setTimeout(showReward, 500);
