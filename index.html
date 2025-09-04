@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="uk">
 <head>
   <meta charset="utf-8">
@@ -7,8 +7,8 @@
 
   <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-  <!-- AR.js -->
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <!-- AR.js (з hit-test) -->
+  <script src="https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js/aframe/build/aframe-ar-nft.js"></script>
   <!-- Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 
@@ -22,7 +22,6 @@
       touch-action: none;
     }
 
-    /* Екран запуску */
     #loading {
       position: fixed;
       top: 0;
@@ -53,7 +52,6 @@
       100% { transform: scale(1); }
     }
 
-    /* Підказка */
     #hint {
       position: fixed;
       top: 20px;
@@ -67,7 +65,6 @@
       z-index: 10;
     }
 
-    /* Кнопка YouTube */
     #smartLessaBtn {
       position: fixed;
       bottom: 15px;
@@ -83,7 +80,6 @@
       box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
 
-    /* AR Сцена */
     a-scene {
       width: 100%;
       height: 100vh;
@@ -92,47 +88,39 @@
 </head>
 <body>
 
-  <!-- Екран: клацни, щоб увімкнути -->
   <div id="loading">
     👣 Сліди знань<br>
     <span>👉 Клацни, щоб увімкнути AR</span>
   </div>
 
-  <!-- Підказка -->
-  <div id="hint">🔍 Наведи на підлогу та рухай камерою</div>
+  <div id="hint">🔍 Наведи на підлогу та повільно рухай камерою</div>
 
-  <!-- Кнопка YouTube -->
   <a href="https://youtube.com/playlist?list=PL6UDFwT9TzFxsVdFiEBsQ9yFpcYRPOpfO&si=IyXv1SkdPyvhcW7Z" 
      id="smartLessaBtn" target="_blank">👉 Дивись більше на @SmartLessa</a>
 
-  <!-- AR Сцена -->
   <a-scene
     embedded
-    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono"
+    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono; canvasWidth: 480; canvasHeight: 640"
     vr-mode-ui="enabled: false"
     renderer="antialias: true; alpha: true; background: transparent"
   >
-    <!-- Камера з hit-test -->
     <a-entity
       camera
-      position="0 0 0"
-      look-controls
-      arjs-hit-test="usePlaneDetection: true; sizeLimit: 0.2; distanceLimit: 5"
+      look-controls="enabled: true"
+      arjs-hit-test="threshold: 1; minDistance: 0.2; smoothingFactor: 0.7; autoStart: true;"
     ></a-entity>
 
-    <!-- Контейнер для слідів і подарунка -->
     <a-entity id="floor"></a-entity>
   </a-scene>
 
   <script>
-    // --- Змінні ---
     const loadingScreen = document.getElementById('loading');
     const hint = document.getElementById('hint');
     const floor = document.getElementById('floor');
 
     let stepCount = 0;
     let lastPosition = null;
-    const stepThreshold = 0.3; // мінімальна відстань між слідами
+    const stepThreshold = 0.3;
 
     // --- Клацни, щоб увімкнути ---
     loadingScreen.addEventListener('click', () => {
@@ -140,40 +128,44 @@
       hint.textContent = '👣 Рухай камерою — залишай сліди знань!';
     });
 
-    // --- AR Hit Test (виявлення підлоги) ---
-    document.querySelector('a-scene').addEventListener('arjs-hit-test', (e) => {
+    // --- Перевірка, чи працює hit-test ---
+    document.querySelector('a-scene').addEventListener('loaded', () => {
+      console.log('✅ AR-сцена завантажена');
+    });
+
+    document.querySelector('a-scene').addEventListener('arjs-hit-test-camera-requested', () => {
+      console.log('⚠️ Потрібно навести на підлогу');
+    });
+
+    // --- AR Hit Test ---
+    document.addEventListener('arjs-hit-test-hit', (e) => {
       const hitPoint = e.detail.hitPoint;
 
-      // Перевіряємо відстань від останнього сліду
+      if (!hitPoint) return;
+
+      // Перевіряємо відстань
       if (lastPosition) {
         const dx = hitPoint.x - lastPosition.x;
         const dy = hitPoint.y - lastPosition.y;
         const dz = hitPoint.z - lastPosition.z;
         const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
-
-        if (dist < stepThreshold) return; // занадто близько
+        if (dist < stepThreshold) return;
       }
 
-      // Зберігаємо позицію
       lastPosition = { ...hitPoint };
 
-      // Чергуємо сліди: спочатку footprint.png (правий), потім footprint1.png (лівий)
-      const isRightFoot = stepCount % 2 === 0; // парний крок — правий
+      // Чергуємо сліди
+      const isRightFoot = stepCount % 2 === 0;
       const src = isRightFoot ? 'assets/footprint.png' : 'assets/footprint1.png';
 
-      // Створюємо слід
       createFootprint(hitPoint, src);
-
-      // Лічимо кроки
       stepCount++;
 
-      // Перевіряємо нагороду
       if (stepCount === 5) {
         setTimeout(showReward, 500);
       }
     });
 
-    // --- Створення сліду ---
     function createFootprint(pos, src) {
       const footprint = document.createElement('a-plane');
       footprint.setAttribute('width', 0.2);
@@ -185,7 +177,6 @@
       floor.appendChild(footprint);
     }
 
-    // --- Показуємо подарунок ---
     function showReward() {
       hint.textContent = '🎉 Молодець! Ти знайшов скарб знань!';
 
@@ -195,7 +186,6 @@
       reward.setAttribute('animation', 'property: scale; to: 1.5 1.5 1.5; dur: 1000; easing: easeOutElastic');
       floor.appendChild(reward);
 
-      // Конфетті!
       confetti({
         particleCount: 150,
         spread: 90,
