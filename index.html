@@ -6,9 +6,9 @@
   <title>Сліди знань — AR для дітей</title>
 
   <!-- A-Frame -->
-  <script src="https://unpkg.com/aframe@1.6.0/dist/aframe.min.js"></script>
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <!-- AR.js -->
-  <script src="https://unpkg.com/@ar-js-org/ar.js@2.2.2/aframe/build/aframe-ar.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.min.js"></script>
   <!-- Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 
@@ -99,12 +99,12 @@
      id="smartLessaBtn" target="_blank">👉 Дивись більше на @SmartLessa</a>
 
   <a-scene embedded
-    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono; trackingMethod: best; patternRatio: 0.5; maxDetectionRate: 60;"
+    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono; trackingMethod: best;"
     vr-mode-ui="enabled: false"
-    renderer="antialias: true; alpha: true"
+    renderer="antialias: true; alpha: true; background: transparent"
   >
     <a-entity camera></a-entity>
-    <a-entity id="floor" position="0 -0.5 0"></a-entity>
+    <a-entity id="floor" position="0 0 0"></a-entity>
   </a-scene>
 
   <script>
@@ -128,21 +128,17 @@
 
     const scene = document.querySelector('a-scene');
     
-    scene.addEventListener('loaded', () => {
-      console.log('Сцена завантажена, камера готова');
+    // Очікуємо завантаження сцени
+    scene.addEventListener('loaded', function() {
+      console.log('Сцена завантажена');
     });
 
     function handleSceneClick(e) {
       e.preventDefault();
       e.stopPropagation();
-      
-      // Перевірка, чи подія відбулася на сцені
-      if (e.target && (e.target.tagName === 'A-SCENE' || e.target.closest('a-scene'))) {
-        createFootprint(e);
-      }
+      createFootprint(e);
     }
 
-    // Додаємо обробники подій
     scene.addEventListener('click', handleSceneClick);
     scene.addEventListener('touchstart', function(e) {
       e.preventDefault();
@@ -164,6 +160,7 @@
       if (event.touches && event.touches.length > 0) {
         clientX = event.touches[0].clientX;
         clientY = event.touches[0].clientY;
+        event.preventDefault();
       } else {
         clientX = event.clientX;
         clientY = event.clientY;
@@ -174,18 +171,20 @@
 
       raycaster.setFromCamera({ x, y }, camera);
 
-      // Створюємо горизонтальну площину для розміщення слідів
+      // Використовуємо горизонтальну площину (y = 0)
       const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
       const point = new THREE.Vector3();
       const intersection = raycaster.ray.intersectPlane(plane, point);
 
       if (intersection) {
-        console.log('Точка перетину:', intersection.x, intersection.y, intersection.z);
+        console.log('Точка перетину:', intersection);
+        
         const isRight = stepCount % 2 === 0;
+        // Використовуємо ваші локальні файли
         const src = isRight ? './footprint1.png' : './footprint.png';
 
         const footprint = document.createElement('a-entity');
-        footprint.setAttribute('geometry', 'primitive: plane; width: 0.5; height: 0.3');
+        footprint.setAttribute('geometry', 'primitive: plane; width: 0.3; height: 0.2');
         footprint.setAttribute('position', `${intersection.x} 0 ${intersection.z}`);
         footprint.setAttribute('rotation', '-90 0 0');
         footprint.setAttribute('material', `src: ${src}; transparent: true; side: double`);
@@ -223,7 +222,6 @@
       });
       reward.setAttribute('position', '0 1.5 -2');
       
-      // Анімація появи нагороди
       reward.setAttribute('animation', {
         property: 'scale',
         from: '0 0 0',
@@ -231,10 +229,9 @@
         dur: 1000,
         easing: 'easeOutElastic'
       });
-
+      
       floor.appendChild(reward);
 
-      // Запуск конфетті
       if (typeof confetti === 'function') {
         confetti({
           particleCount: 150,
@@ -245,19 +242,8 @@
       }
     }
 
-    // Обробка помилок завантаження
     window.addEventListener('error', function(e) {
       console.error('Помилка завантаження:', e.error);
-    });
-
-    // Перевірка завантаження скриптів
-    window.addEventListener('load', function() {
-      if (typeof AFRAME === 'undefined') {
-        console.error('AFRAME не завантажено');
-      }
-      if (typeof confetti === 'undefined') {
-        console.error('Confetti не завантажено');
-      }
     });
   </script>
 </body>
