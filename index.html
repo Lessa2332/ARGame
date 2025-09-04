@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no">
-  <title>Сліди знань — AR для дітей</title>
+  <title>Слідуй </title>
 
   <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
@@ -117,7 +117,6 @@
       camera
       position="0 0 0"
       look-controls
-      raycaster="objects: .clickable"
       arjs-hit-test="usePlaneDetection: true; sizeLimit: 0.2; distanceLimit: 5"
     ></a-entity>
 
@@ -133,7 +132,7 @@
 
     let stepCount = 0;
     let lastPosition = null;
-    const stepThreshold = 0.3; // мінімальна відстань між слідами (у метрах)
+    const stepThreshold = 0.3; // мінімальна відстань між слідами
 
     // --- Клацни, щоб увімкнути ---
     loadingScreen.addEventListener('click', () => {
@@ -158,12 +157,15 @@
       // Зберігаємо позицію
       lastPosition = { ...hitPoint };
 
+      // Чергуємо сліди: спочатку footprint.png (правий), потім footprint1.png (лівий)
+      const isRightFoot = stepCount % 2 === 0; // парний крок — правий
+      const src = isRightFoot ? 'assets/footprint.png' : 'assets/footprint1.png';
+
       // Створюємо слід
-      createFootprint(hitPoint);
+      createFootprint(hitPoint, src);
 
       // Лічимо кроки
       stepCount++;
-      console.log("Крок:", stepCount);
 
       // Перевіряємо нагороду
       if (stepCount === 5) {
@@ -172,20 +174,20 @@
     });
 
     // --- Створення сліду ---
-    function createFootprint(pos) {
+    function createFootprint(pos, src) {
       const footprint = document.createElement('a-plane');
       footprint.setAttribute('width', 0.2);
       footprint.setAttribute('height', 0.1);
       footprint.setAttribute('position', `${pos.x} ${pos.y} ${pos.z}`);
       footprint.setAttribute('rotation', '-90 0 0');
-      footprint.setAttribute('material', 'src: https://img.icons8.com/color/480/000000/footprint.png; transparent: true; side: double');
+      footprint.setAttribute('material', `src: ${src}; transparent: true; side: double`);
       footprint.setAttribute('animation', 'property: scale; to: 0.8 0.8 0.8; dur: 1000; easing: easeOutElastic');
       floor.appendChild(footprint);
     }
 
     // --- Показуємо подарунок ---
     function showReward() {
-      hint.textContent = '🎉 Молодець! Ти знайшов скарб знань!';
+      hint.textContent = '🎉 Молодець! Ти знайшов скарб - ОЛЕСЮ!';
 
       const reward = document.createElement('a-entity');
       reward.setAttribute('text', 'value: Молодець! 🎉\nСкарб знань відкрито!; align: center; color: #d1006c; width: 3;');
@@ -200,13 +202,8 @@
         origin: { y: 0.6 },
         colors: ['#ff0044', '#ffa500', '#ffff00', '#00ff00', '#0066ff']
       });
-
-      // Голосове повідомлення (опціонально)
-      setTimeout(() => {
-        const audio = new Audio('https://cdn.pixabay.com/audio/2021/09/21/audio_2811f3692c.mp3');
-        audio.play().catch(() => {});
-      }, 800);
     }
   </script>
 </body>
 </html>
+
