@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="uk">
 <head>
   <meta charset="utf-8">
@@ -115,11 +115,11 @@
 
     let stepCount = 0;
     let lastFootprintPosition = null;
-    const MIN_STEP_DISTANCE = 0.35; // 35 см між слідами
+    const MIN_STEP_DISTANCE = 0.3; // 30 см між слідами
     let footprints = [];
 
     function startAR(e) {
-      e.preventDefault();
+      if (e) e.preventDefault();
       loadingScreen.style.display = 'none';
       hint.textContent = '👆 Тикни пальцем — залиш слід знань!';
     }
@@ -132,7 +132,7 @@
 
     const scene = document.querySelector('a-scene');
     
-    scene.addEventListener('loaded', function() {
+    scene.addEventListener(' loaded', function() {
       console.log('Сцена завантажена');
     });
 
@@ -149,13 +149,19 @@
     }, { passive: false });
 
     function createFootprint(event) {
-      if (!scene.camera) {
-        console.log('Камера ще не готова');
+      if (!scene.is('ar-mode')) {
+        console.log('AR режим ще не активний');
         return;
       }
 
       const camera = scene.camera;
+      if (!camera) {
+        console.log('Камера ще не готова');
+        return;
+      }
+
       const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
 
       const rect = scene.canvas.getBoundingClientRect();
       let clientX, clientY;
@@ -168,27 +174,27 @@
         clientY = event.clientY;
       }
 
-      const x = ((clientX - rect.left) / rect.width) * 2 - 1;
-      const y = -((clientY - rect.top) / rect.height) * 2 + 1;
+      mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
 
-      raycaster.setFromCamera({ x, y }, camera);
+      raycaster.setFromCamera(mouse, camera);
 
-      // ПРАВИЛЬНА горизонтальна площина для підлоги (y = 0)
-      const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0); // ВАЖЛИВО: y = 1, відстань = 0
-      const point = new THREE.Vector3();
-      const intersection = raycaster.ray.intersectPlane(plane, point);
+      // Горизонтальна площина на рівні підлоги (y = 0)
+      const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+      const intersection = new THREE.Vector3();
+      const intersects = raycaster.ray.intersectPlane(plane, intersection);
 
-      if (intersection) {
+      if (intersects) {
         // Перевірка відстані від останнього сліду
         if (lastFootprintPosition) {
           const distance = intersection.distanceTo(lastFootprintPosition);
           if (distance < MIN_STEP_DISTANCE) {
-            console.log('Занадто близько до попереднього сліду');
+            console.log('Занадто близько до попереднього сліду:', distance.toFixed(2), 'м');
             return;
           }
         }
 
-        console.log('Точка перетину (підлога):', intersection);
+        console.log('Точка перетину:', intersection.x.toFixed(2), intersection.y.toFixed(2), intersection.z.toFixed(2));
         
         const isRight = stepCount % 2 === 0;
         const src = isRight ? './footprint1.png' : './footprint.png';
@@ -197,13 +203,13 @@
         footprint.setAttribute('geometry', 'primitive: plane; width: 0.25; height: 0.15');
         footprint.setAttribute('material', `src: ${src}; transparent: true; side: double`);
         
-        // ПРАВИЛЬНЕ позиціонування НА ПІДЛОЗІ (y = 0.01 для видимості)
-        footprint.setAttribute('position', `${intersection.x} 0.01 ${intersection.z}`);
+        // Позиція на підлозі (y = 0.01 для видимості)
+        footprint.setAttribute('position', `${intersection.x.toFixed(3)} 0.01 ${intersection.z.toFixed(3)}`);
         footprint.setAttribute('rotation', '-90 0 0');
         
-        // Додаємо випадковий поворот для природності
-        const randomRotation = Math.random() * 15 - 7.5; // від -7.5 до 7.5 градусів
-        footprint.setAttribute('rotation', `-90 ${randomRotation} 0`);
+        // Випадковий поворот для природності
+        const randomRotation = Math.random() * 20 - 10;
+        footprint.setAttribute('rotation', `-90 ${randomRotation.toFixed(1)} 0`);
         
         // Анімація появи
         footprint.setAttribute('animation', {
@@ -215,7 +221,7 @@
         });
 
         floor.appendChild(footprint);
-        console.log('Слід створено на підлозі:', footprint);
+        console.log('Слід створено');
         
         // Зберігаємо слід у масиві
         footprints.push(footprint);
@@ -224,8 +230,8 @@
         lastFootprintPosition = intersection.clone();
         stepCount++;
 
-        // Видаляємо найстаріший слід, якщо їх більше 6
-        if (footprints.length > 6) {
+        // Видаляємо найстаріший слід, якщо їх більше 8
+        if (footprints.length > 8) {
           const oldestFootprint = footprints.shift();
           if (oldestFootprint.parentNode) {
             oldestFootprint.parentNode.removeChild(oldestFootprint);
@@ -272,8 +278,9 @@
       }
     }
 
+    // Обробка помилок
     window.addEventListener('error', function(e) {
-      console.error('Помилка завантаження:', e.error);
+      console.error('Помилка:', e.error);
     });
   </script>
 </body>
