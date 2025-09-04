@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
   <meta charset="utf-8">
@@ -63,6 +63,7 @@
       font-weight: bold;
       pointer-events: none;
       z-index: 10;
+      text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
     }
 
     #smartLessaBtn {
@@ -114,7 +115,8 @@
 
     let stepCount = 0;
     let lastFootprintPosition = null;
-    const MIN_STEP_DISTANCE = 0.3; // 30 см між слідами
+    const MIN_STEP_DISTANCE = 0.4; // 40 см між слідами для кращого розташування
+    let footprints = []; // Масив для зберігання всіх слідів
 
     function startAR(e) {
       e.preventDefault();
@@ -171,7 +173,7 @@
 
       raycaster.setFromCamera({ x, y }, camera);
 
-      // Горизонтальна площина (підлога)
+      // Використовуємо горизонтальну площину (y = 0)
       const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
       const point = new THREE.Vector3();
       const intersection = raycaster.ray.intersectPlane(plane, point);
@@ -192,37 +194,53 @@
         const src = isRight ? './footprint1.png' : './footprint.png';
 
         const footprint = document.createElement('a-entity');
-        footprint.setAttribute('geometry', 'primitive: plane; width: 0.25; height: 0.15');
+        footprint.setAttribute('geometry', 'primitive: plane; width: 0.28; height: 0.18');
         footprint.setAttribute('material', `src: ${src}; transparent: true; side: double`);
         footprint.setAttribute('position', `${intersection.x} 0.01 ${intersection.z}`);
         footprint.setAttribute('rotation', '-90 0 0');
         
-        // Анімація появи
+        // Додаємо випадковий поворот для природності
+        const randomRotation = Math.random() * 20 - 10; // від -10 до 10 градусів
+        footprint.setAttribute('rotation', `-90 ${randomRotation} 0`);
+        
+        // Анімація появи з ефектом "спливання"
         footprint.setAttribute('animation', {
           property: 'scale',
           from: '0 0 0',
           to: '1 1 1',
-          dur: 600,
-          easing: 'easeOutElastic'
+          dur: 700,
+          easing: 'easeOutBack'
+        });
+        
+        // Анімація з'явлення з легким підскоком
+        footprint.setAttribute('animation__position', {
+          property: 'position',
+          from: `${intersection.x} -0.1 ${intersection.z}`,
+          to: `${intersection.x} 0.01 ${intersection.z}`,
+          dur: 700,
+          easing: 'easeOutBounce'
         });
 
         floor.appendChild(footprint);
         console.log('Слід створено:', footprint);
         
+        // Зберігаємо слід у масиві
+        footprints.push(footprint);
+        
         // Зберігаємо позицію останнього сліду
         lastFootprintPosition = intersection.clone();
         stepCount++;
 
-        // Видаляємо перший слід, якщо їх більше 10
-        if (stepCount > 10) {
-          const firstFootprint = floor.firstChild;
-          if (firstFootprint) {
-            floor.removeChild(firstFootprint);
+        // Видаляємо найстаріший слід, якщо їх більше 8
+        if (footprints.length > 8) {
+          const oldestFootprint = footprints.shift();
+          if (oldestFootprint.parentNode) {
+            oldestFootprint.parentNode.removeChild(oldestFootprint);
           }
         }
 
         if (stepCount === 5) {
-          setTimeout(showReward, 500);
+          setTimeout(showReward, 800);
         }
       } else {
         console.log('Немає перетину з площиною');
@@ -237,26 +255,47 @@
         value: 'Молодець! 🎉\nСкарб знань відкрито!',
         align: 'center',
         color: '#d1006c',
-        width: 3
+        width: 3,
+        font: 'kelsonsans'
       });
-      reward.setAttribute('position', '0 1.5 -2');
+      reward.setAttribute('position', '0 1.8 -2');
       
+      // Анімація появи нагороди
       reward.setAttribute('animation', {
         property: 'scale',
         from: '0 0 0',
         to: '1.5 1.5 1.5',
-        dur: 1000,
+        dur: 1200,
         easing: 'easeOutElastic'
+      });
+      
+      // Анімація обертання
+      reward.setAttribute('animation__rotation', {
+        property: 'rotation',
+        from: '0 0 0',
+        to: '0 360 0',
+        dur: 2000,
+        easing: 'linear',
+        loop: 'true'
       });
       
       floor.appendChild(reward);
 
+      // Додаємо світловий ефект
+      const light = document.createElement('a-entity');
+      light.setAttribute('light', 'type: point; color: #ffcc00; intensity: 1.5; distance: 5');
+      light.setAttribute('position', '0 2 -2');
+      floor.appendChild(light);
+
       if (typeof confetti === 'function') {
+        // Більш вражаючий ефект конфетті
         confetti({
-          particleCount: 150,
-          spread: 90,
+          particleCount: 200,
+          spread: 120,
           origin: { y: 0.6 },
-          colors: ['#ff0044', '#ffa500', '#ffff00', '#00ff00', '#0066ff']
+          colors: ['#ff0044', '#ffa500', '#ffff00', '#00ff00', '#0066ff', '#8a2be2'],
+          shapes: ['circle', 'square'],
+          gravity: 0.8
         });
       }
     }
