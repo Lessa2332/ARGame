@@ -7,8 +7,8 @@
 
   <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-  <!-- AR.js -->
-  <script src="https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js/aframe/build/aframe-ar-nft.js"></script>
+  <!-- AR.js (базовий) -->
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
   <!-- Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 
@@ -67,7 +67,7 @@
       z-index: 10;
     }
 
-    /* Кнопка YouTube — твоя */
+    /* Кнопка YouTube */
     #smartLessaBtn {
       position: fixed;
       bottom: 15px;
@@ -99,82 +99,86 @@
   </div>
 
   <!-- Підказка -->
-  <div id="hint">🔍 Наведи на підлогу та повільно рухай камерою</div>
+  <div id="hint">👆 Тикни пальцем — залиш слід знань!</div>
 
-  <!-- Твоя кнопка YouTube -->
+  <!-- Кнопка YouTube -->
   <a href="https://youtube.com/playlist?list=PL6UDFwT9TzFxsVdFiEBsQ9yFpcYRPOpfO&si=IyXv1SkdPyvhcW7Z" 
      id="smartLessaBtn" target="_blank">👉 Дивись більше на @SmartLessa</a>
 
   <!-- AR Сцена -->
-  <a-scene
-    embedded
-    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono; canvasWidth: 480; canvasHeight: 640"
+  <a-scene embedded
+    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono"
     vr-mode-ui="enabled: false"
     renderer="antialias: true; alpha: true; background: transparent"
   >
-    <a-entity
-      camera
-      look-controls="enabled: true"
-      arjs-hit-test="threshold: 1; minDistance: 0.2; smoothingFactor: 0.7; autoStart: true;"
-    ></a-entity>
+    <!-- Камера -->
+    <a-entity camera></a-entity>
 
+    <!-- Контейнер для слідів -->
     <a-entity id="floor"></a-entity>
   </a-scene>
 
   <script>
+    // --- Змінні ---
     const loadingScreen = document.getElementById('loading');
     const hint = document.getElementById('hint');
     const floor = document.getElementById('floor');
 
     let stepCount = 0;
-    let lastPosition = null;
-    const stepThreshold = 0.3;
 
     // --- Клацни, щоб увімкнути ---
     loadingScreen.addEventListener('click', () => {
       loadingScreen.style.display = 'none';
-      hint.textContent = '👣 Рухай камерою — залишай сліди знань!';
+      hint.textContent = '👆 Тикни пальцем — залиш слід знань!';
     });
 
-    // --- AR Hit Test ---
-    document.addEventListener('arjs-hit-test-hit', (e) => {
-      const hitPoint = e.detail.hitPoint;
-
-      if (!hitPoint) return;
-
-      // Перевіряємо відстань між слідами
-      if (lastPosition) {
-        const dx = hitPoint.x - lastPosition.x;
-        const dy = hitPoint.y - lastPosition.y;
-        const dz = hitPoint.z - lastPosition.z;
-        const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
-        if (dist < stepThreshold) return;
-      }
-
-      lastPosition = { ...hitPoint };
-
-      // Чергуємо сліди: правий → лівий → правий...
-      const isRightFoot = stepCount % 2 === 0;
-      const src = isRightFoot ? 'assets/footprint.png' : 'assets/footprint1.png';
-
-      createFootprint(hitPoint, src);
-      stepCount++;
-
-      if (stepCount === 5) {
-        setTimeout(showReward, 500);
+    // --- Натискання на екран ---
+    document.querySelector('a-scene').addEventListener('click', (e) => {
+      // Перевіряємо, що клік був у межах сцени
+      if (e.target.tagName === 'A-SCENE' || e.target.closest('a-scene')) {
+        createFootprint(e);
       }
     });
 
     // --- Створення сліду ---
-    function createFootprint(pos, src) {
-      const footprint = document.createElement('a-plane');
-      footprint.setAttribute('width', 0.2);
-      footprint.setAttribute('height', 0.1);
-      footprint.setAttribute('position', `${pos.x} ${pos.y} ${pos.z}`);
-      footprint.setAttribute('rotation', '-90 0 0');
-      footprint.setAttribute('material', `src: ${src}; transparent: true; side: double`);
-      footprint.setAttribute('animation', 'property: scale; to: 0.8 0.8 0.8; dur: 1000; easing: easeOutElastic');
-      floor.appendChild(footprint);
+    function createFootprint(event) {
+      const scene = document.querySelector('a-scene');
+      const camera = scene.camera;
+      const raycaster = new THREE.Raycaster();
+
+      // Перетворюємо координати екрану в NDC
+      const rect = scene.canvas.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera({ x, y }, camera);
+
+      // Створюємо площину на підлозі (z = 0)
+      const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+      const point = new THREE.Vector3();
+      const intersection = raycaster.ray.intersectPlane(plane, point);
+
+      if (intersection) {
+        // Визначаємо, який слід: правий чи лівий
+        const isRightFoot = stepCount % 2 === 0;
+        const src = isRightFoot ? 'assets/footprint.png' : 'assets/footprint1.png';
+
+        const footprint = document.createElement('a-plane');
+        footprint.setAttribute('width', 0.2);
+        footprint.setAttribute('height', 0.1);
+        footprint.setAttribute('position', `${intersection.x} ${intersection.y} 0`);
+        footprint.setAttribute('rotation', '-90 0 0');
+        footprint.setAttribute('material', `src: ${src}; transparent: true; side: double`);
+        footprint.setAttribute('animation', 'property: scale; to: 0.8 0.8 0.8; dur: 1000; easing: easeOutElastic');
+        floor.appendChild(footprint);
+
+        stepCount++;
+
+        // Перевіряємо нагороду
+        if (stepCount === 5) {
+          setTimeout(showReward, 500);
+        }
+      }
     }
 
     // --- Показуємо подарунок ---
