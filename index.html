@@ -8,7 +8,7 @@
   <!-- A-Frame -->
   <script src="https://unpkg.com/aframe@1.6.0/dist/aframe.min.js"></script>
   <!-- AR.js -->
-  <script src="https://unpkg.com/@ar-js-org/ar.js@2.2.2/aframe/build/aframe-ar.js"></script>
+  <script src="https://unpkg.com/@ar-js-org/ar.js@2.2.2/aframe/build/aframe-ar.min.js"></script>
   <!-- Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 
@@ -104,7 +104,7 @@
     renderer="antialias: true; alpha: true"
   >
     <a-entity camera></a-entity>
-    <a-entity id="floor" position="0 0 0"></a-entity>
+    <a-entity id="floor" position="0 -0.5 0"></a-entity>
   </a-scene>
 
   <script>
@@ -114,30 +114,40 @@
 
     let stepCount = 0;
 
-    loadingScreen.addEventListener('click', startAR);
-    loadingScreen.addEventListener('touchstart', startAR);
-
     function startAR(e) {
       e.preventDefault();
       loadingScreen.style.display = 'none';
       hint.textContent = '👆 Тикни пальцем — залиш слід знань!';
     }
 
-    const scene = document.querySelector('a-scene');
-    scene.addEventListener('loaded', () => {
-      console.log('Сцена завантажена, камера готова:', scene.camera);
+    loadingScreen.addEventListener('click', startAR);
+    loadingScreen.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      startAR(e);
     });
-    scene.addEventListener('click', handleSceneClick);
-    scene.addEventListener('touchstart', handleSceneClick);
-    scene.addEventListener('touchmove', handleSceneClick); // Додатковий обробник
+
+    const scene = document.querySelector('a-scene');
+    
+    scene.addEventListener('loaded', () => {
+      console.log('Сцена завантажена, камера готова');
+    });
 
     function handleSceneClick(e) {
       e.preventDefault();
-      console.log('Подія клік/тач:', e.type, e);
-      if (e.target.tagName === 'A-SCENE' || e.target.closest('a-scene')) {
+      e.stopPropagation();
+      
+      // Перевірка, чи подія відбулася на сцені
+      if (e.target && (e.target.tagName === 'A-SCENE' || e.target.closest('a-scene'))) {
         createFootprint(e);
       }
     }
+
+    // Додаємо обробники подій
+    scene.addEventListener('click', handleSceneClick);
+    scene.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      handleSceneClick(e);
+    }, { passive: false });
 
     function createFootprint(event) {
       if (!scene.camera) {
@@ -164,7 +174,8 @@
 
       raycaster.setFromCamera({ x, y }, camera);
 
-      const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -0.2); // Змінено з -0.5 на -0.2 для кращого перетину
+      // Створюємо горизонтальну площину для розміщення слідів
+      const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
       const point = new THREE.Vector3();
       const intersection = raycaster.ray.intersectPlane(plane, point);
 
@@ -173,13 +184,20 @@
         const isRight = stepCount % 2 === 0;
         const src = isRight ? './footprint1.png' : './footprint.png';
 
-        const footprint = document.createElement('a-plane');
-        footprint.setAttribute('width', 0.5);
-        footprint.setAttribute('height', 0.3);
-        footprint.setAttribute('position', `${intersection.x} ${intersection.y} -0.2`);
+        const footprint = document.createElement('a-entity');
+        footprint.setAttribute('geometry', 'primitive: plane; width: 0.5; height: 0.3');
+        footprint.setAttribute('position', `${intersection.x} 0 ${intersection.z}`);
         footprint.setAttribute('rotation', '-90 0 0');
         footprint.setAttribute('material', `src: ${src}; transparent: true; side: double`);
-        footprint.setAttribute('animation', 'property: scale; to: 1 1 1; dur: 1000; easing: easeOutElastic');
+        
+        // Анімація появи
+        footprint.setAttribute('animation', {
+          property: 'scale',
+          from: '0 0 0',
+          to: '1 1 1',
+          dur: 800,
+          easing: 'easeOutElastic'
+        });
 
         floor.appendChild(footprint);
         console.log('Слід створено:', footprint);
@@ -189,7 +207,7 @@
           setTimeout(showReward, 500);
         }
       } else {
-        console.log('Немає перетину з площиною, x:', x, 'y:', y);
+        console.log('Немає перетину з площиною');
       }
     }
 
@@ -197,11 +215,26 @@
       hint.textContent = '🎉 Молодець! Ти знайшов скарб знань!';
 
       const reward = document.createElement('a-entity');
-      reward.setAttribute('text', 'value: Молодець! 🎉\nСкарб знань відкрито!; align: center; color: #d1006c; width: 3;');
+      reward.setAttribute('text', {
+        value: 'Молодець! 🎉\nСкарб знань відкрито!',
+        align: 'center',
+        color: '#d1006c',
+        width: 3
+      });
       reward.setAttribute('position', '0 1.5 -2');
-      reward.setAttribute('animation', 'property: scale; to: 1.5 1.5 1.5; dur: 1000; easing: easeOutElastic');
+      
+      // Анімація появи нагороди
+      reward.setAttribute('animation', {
+        property: 'scale',
+        from: '0 0 0',
+        to: '1.5 1.5 1.5',
+        dur: 1000,
+        easing: 'easeOutElastic'
+      });
+
       floor.appendChild(reward);
 
+      // Запуск конфетті
       if (typeof confetti === 'function') {
         confetti({
           particleCount: 150,
@@ -209,13 +242,22 @@
           origin: { y: 0.6 },
           colors: ['#ff0044', '#ffa500', '#ffff00', '#00ff00', '#0066ff']
         });
-      } else {
-        console.error('Конфетті не завантажено');
       }
     }
 
+    // Обробка помилок завантаження
     window.addEventListener('error', function(e) {
       console.error('Помилка завантаження:', e.error);
+    });
+
+    // Перевірка завантаження скриптів
+    window.addEventListener('load', function() {
+      if (typeof AFRAME === 'undefined') {
+        console.error('AFRAME не завантажено');
+      }
+      if (typeof confetti === 'undefined') {
+        console.error('Confetti не завантажено');
+      }
     });
   </script>
 </body>
