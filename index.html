@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
   <meta charset="utf-8">
@@ -115,11 +115,11 @@
 
     let stepCount = 0;
     let lastFootprintPosition = null;
-    const MIN_STEP_DISTANCE = 0.3; // 30 см між слідами
+    const MIN_STEP_DISTANCE = 0.3;
     let footprints = [];
 
     function startAR(e) {
-      if (e) e.preventDefault();
+      e.preventDefault();
       loadingScreen.style.display = 'none';
       hint.textContent = '👆 Тикни пальцем — залиш слід знань!';
     }
@@ -132,7 +132,8 @@
 
     const scene = document.querySelector('a-scene');
     
-    scene.addEventListener(' loaded', function() {
+    // Перевірка готовності сцени
+    scene.addEventListener('loaded', function() {
       console.log('Сцена завантажена');
     });
 
@@ -149,19 +150,13 @@
     }, { passive: false });
 
     function createFootprint(event) {
-      if (!scene.is('ar-mode')) {
-        console.log('AR режим ще не активний');
-        return;
-      }
-
-      const camera = scene.camera;
-      if (!camera) {
+      if (!scene.camera) {
         console.log('Камера ще не готова');
         return;
       }
 
+      const camera = scene.camera;
       const raycaster = new THREE.Raycaster();
-      const mouse = new THREE.Vector2();
 
       const rect = scene.canvas.getBoundingClientRect();
       let clientX, clientY;
@@ -174,42 +169,33 @@
         clientY = event.clientY;
       }
 
-      mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-      mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+      const x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((clientY - rect.top) / rect.height) * 2 + 1;
 
-      raycaster.setFromCamera(mouse, camera);
+      raycaster.setFromCamera({ x, y }, camera);
 
-      // Горизонтальна площина на рівні підлоги (y = 0)
+      // Горизонтальна площина для підлоги
       const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-      const intersection = new THREE.Vector3();
-      const intersects = raycaster.ray.intersectPlane(plane, intersection);
+      const point = new THREE.Vector3();
+      const intersection = raycaster.ray.intersectPlane(plane, point);
 
-      if (intersects) {
-        // Перевірка відстані від останнього сліду
+      if (intersection) {
+        // Перевірка відстані між слідами
         if (lastFootprintPosition) {
           const distance = intersection.distanceTo(lastFootprintPosition);
           if (distance < MIN_STEP_DISTANCE) {
-            console.log('Занадто близько до попереднього сліду:', distance.toFixed(2), 'м');
             return;
           }
         }
 
-        console.log('Точка перетину:', intersection.x.toFixed(2), intersection.y.toFixed(2), intersection.z.toFixed(2));
-        
         const isRight = stepCount % 2 === 0;
         const src = isRight ? './footprint1.png' : './footprint.png';
 
         const footprint = document.createElement('a-entity');
         footprint.setAttribute('geometry', 'primitive: plane; width: 0.25; height: 0.15');
         footprint.setAttribute('material', `src: ${src}; transparent: true; side: double`);
-        
-        // Позиція на підлозі (y = 0.01 для видимості)
-        footprint.setAttribute('position', `${intersection.x.toFixed(3)} 0.01 ${intersection.z.toFixed(3)}`);
+        footprint.setAttribute('position', `${intersection.x} 0.01 ${intersection.z}`);
         footprint.setAttribute('rotation', '-90 0 0');
-        
-        // Випадковий поворот для природності
-        const randomRotation = Math.random() * 20 - 10;
-        footprint.setAttribute('rotation', `-90 ${randomRotation.toFixed(1)} 0`);
         
         // Анімація появи
         footprint.setAttribute('animation', {
@@ -221,28 +207,21 @@
         });
 
         floor.appendChild(footprint);
-        console.log('Слід створено');
-        
-        // Зберігаємо слід у масиві
         footprints.push(footprint);
-        
-        // Зберігаємо позицію останнього сліду
         lastFootprintPosition = intersection.clone();
         stepCount++;
 
-        // Видаляємо найстаріший слід, якщо їх більше 8
+        // Видаляємо старі сліди
         if (footprints.length > 8) {
-          const oldestFootprint = footprints.shift();
-          if (oldestFootprint.parentNode) {
-            oldestFootprint.parentNode.removeChild(oldestFootprint);
+          const oldest = footprints.shift();
+          if (oldest.parentNode) {
+            oldest.parentNode.removeChild(oldest);
           }
         }
 
         if (stepCount === 5) {
           setTimeout(showReward, 700);
         }
-      } else {
-        console.log('Немає перетину з підлогою');
       }
     }
 
@@ -278,7 +257,6 @@
       }
     }
 
-    // Обробка помилок
     window.addEventListener('error', function(e) {
       console.error('Помилка:', e.error);
     });
