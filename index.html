@@ -1,265 +1,114 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no">
-  <title>Сліди знань — AR для дітей</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AR Сліди</title>
 
-  <!-- A-Frame -->
-  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <!-- AR.js -->
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.min.js"></script>
-  <!-- Confetti -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ar.js@latest/build/aframe-ar.min.js"></script>
 
   <style>
     body {
       margin: 0;
-      padding: 0;
-      font-family: 'Comic Sans MS', cursive, sans-serif;
-      background: #e6f7ff;
       overflow: hidden;
-      touch-action: none;
     }
-
-    #loading {
+    .ui {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #00b4db, #0083b0);
-      color: white;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
       display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      font-size: 1.6em;
-      z-index: 300;
-      text-align: center;
-      padding: 20px;
+      gap: 10px;
+      background: rgba(0,0,0,0.6);
+      padding: 10px;
+      border-radius: 10px;
     }
-
-    #loading span {
-      font-size: 1.2em;
-      opacity: 0.9;
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-
-    #hint {
-      position: fixed;
-      top: 20px;
-      left: 0;
-      width: 100%;
-      text-align: center;
-      font-size: 18px;
-      color: #005f73;
-      font-weight: bold;
-      pointer-events: none;
-      z-index: 10;
-      text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
-    }
-
-    #smartLessaBtn {
-      position: fixed;
-      bottom: 15px;
-      right: 15px;
-      background: linear-gradient(45deg, #ff0000, #cc0000);
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      background: #007bff;
       color: white;
-      font-size: 12px;
       font-weight: bold;
-      text-decoration: none;
-      padding: 8px 12px;
-      border-radius: 20px;
-      z-index: 90;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      cursor: pointer;
     }
-
-    a-scene {
-      width: 100%;
-      height: 100vh;
+    button:disabled {
+      background: #ccc;
     }
   </style>
 </head>
 <body>
 
-  <div id="loading">
-    👣 Сліди знань<br>
-    <span>👉 Клацни, щоб увімкнути AR</span>
+  <!-- Постійна кнопка SmartLessa -->
+  <div style="position:fixed; bottom:10px; left:50%; transform:translateX(-50%);
+              background:orange; color:black; font-weight:bold; padding:8px 16px; 
+              border-radius:12px; font-family:sans-serif; z-index:999;">
+    SmartLessa
   </div>
 
-  <div id="hint">👆 Тикни пальцем — залиш слід знань!</div>
+  <!-- AR Сцена -->
+  <a-scene embedded arjs>
+    <a-assets>
+      <!-- Завантажуємо ваші файли -->
+      <img id="footprint" src="https://raw.githubusercontent.com/Lessa2332/AR-Footprints-Game/main/footprint.png" />
+      <img id="footprint1" src="https://raw.githubusercontent.com/Lessa2332/AR-Footprints-Game/main/footprint1.png" />
+    </a-assets>
 
-  <a href="https://youtube.com/playlist?list=PL6UDFwT9TzFxsVdFiEBsQ9yFpcYRPOpfO&si=IyXv1SkdPyvhcW7Z" 
-     id="smartLessaBtn" target="_blank">👉 Дивись більше на @SmartLessa</a>
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-  <a-scene embedded
-    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono; trackingMethod: best;"
-    vr-mode-ui="enabled: false"
-    renderer="antialias: true; alpha: true; background: transparent"
-  >
-    <a-entity camera></a-entity>
-    <a-entity id="floor" position="0 0 0"></a-entity>
+    <!-- Маркер Hiro -->
+    <a-marker preset="hiro">
+      <!-- 8 слідів: чергування лівий → правий → лівий → ... -->
+      <a-image src="#footprint"  id="foot1" position="0 0 -0.1" rotation="-90 0 0" scale="0.5 0.5 0.5" visible="true"></a-image>
+      <a-image src="#footprint1" id="foot2" position="0 0 -0.3" rotation="-90 0 0" scale="0.5 0.5 0.5" visible="false"></a-image>
+      <a-image src="#footprint"  id="foot3" position="0 0 -0.5" rotation="-90 0 0" scale="0.5 0.5 0.5" visible="false"></a-image>
+      <a-image src="#footprint1" id="foot4" position="0 0 -0.7" rotation="-90 0 0" scale="0.5 0.5 0.5" visible="false"></a-image>
+      <a-image src="#footprint"  id="foot5" position="0 0 -0.9" rotation="-90 0 0" scale="0.5 0.5 0.5" visible="false"></a-image>
+      <a-image src="#footprint1" id="foot6" position="0 0 -1.1" rotation="-90 0 0" scale="0.5 0.5 0.5" visible="false"></a-image>
+      <a-image src="#footprint"  id="foot7" position="0 0 -1.3" rotation="-90 0 0" scale="0.5 0.5 0.5" visible="false"></a-image>
+      <a-image src="#footprint1" id="foot8" position="0 0 -1.5" rotation="-90 0 0" scale="0.5 0.5 0.5" visible="false"></a-image>
+
+      <!-- Ключ -->
+      <a-text id="key" value="🔑" position="0 0 -1.8" scale="2 2 2" visible="false"
+              color="yellow"
+              animation="property: rotation; to: 0 360 0; loop: true; dur: 2000"></a-text>
+
+      <!-- Текст завдання -->
+      <a-text id="task" value="Привіт! Це твоє завдання." position="0 0.5 -1.5" scale="2 2 2" visible="false" color="red"></a-text>
+    </a-marker>
   </a-scene>
 
   <script>
-    const loadingScreen = document.getElementById('loading');
-    const hint = document.getElementById('hint');
-    const floor = document.querySelector('#floor');
-
-    let stepCount = 0;
-    let lastFootprintPosition = null;
-    const MIN_STEP_DISTANCE = 0.3;
-    let footprints = [];
-
-    function startAR(e) {
-      e.preventDefault();
-      loadingScreen.style.display = 'none';
-      hint.textContent = '👆 Тикни пальцем — залиш слід знань!';
+    // Зчитуємо всі сліди
+    const steps = [];
+    for (let i = 1; i <= 8; i++) {
+      steps.push(document.getElementById(`foot${i}`));
     }
+    const key = document.getElementById("key");
+    const task = document.getElementById("task");
 
-    loadingScreen.addEventListener('click', startAR);
-    loadingScreen.addEventListener('touchstart', function(e) {
-      e.preventDefault();
-      startAR(e);
+    // Логіка клацання слідів
+    steps.forEach((foot, idx) => {
+      foot.addEventListener("click", () => {
+        foot.setAttribute("visible", "false");
+        if (idx < steps.length - 1) {
+          steps[idx + 1].setAttribute("visible", "true");
+        } else {
+          key.setAttribute("visible", "true");
+        }
+      });
     });
 
-    const scene = document.querySelector('a-scene');
-    
-    // Перевірка готовності сцени
-    scene.addEventListener('loaded', function() {
-      console.log('Сцена завантажена');
-    });
-
-    function handleSceneClick(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      createFootprint(e);
-    }
-
-    scene.addEventListener('click', handleSceneClick);
-    scene.addEventListener('touchstart', function(e) {
-      e.preventDefault();
-      handleSceneClick(e);
-    }, { passive: false });
-
-    function createFootprint(event) {
-      if (!scene.camera) {
-        console.log('Камера ще не готова');
-        return;
-      }
-
-      const camera = scene.camera;
-      const raycaster = new THREE.Raycaster();
-
-      const rect = scene.canvas.getBoundingClientRect();
-      let clientX, clientY;
-
-      if (event.touches && event.touches.length > 0) {
-        clientX = event.touches[0].clientX;
-        clientY = event.touches[0].clientY;
-      } else {
-        clientX = event.clientX;
-        clientY = event.clientY;
-      }
-
-      const x = ((clientX - rect.left) / rect.width) * 2 - 1;
-      const y = -((clientY - rect.top) / rect.height) * 2 + 1;
-
-      raycaster.setFromCamera({ x, y }, camera);
-
-      // Горизонтальна площина для підлоги
-      const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-      const point = new THREE.Vector3();
-      const intersection = raycaster.ray.intersectPlane(plane, point);
-
-      if (intersection) {
-        // Перевірка відстані між слідами
-        if (lastFootprintPosition) {
-          const distance = intersection.distanceTo(lastFootprintPosition);
-          if (distance < MIN_STEP_DISTANCE) {
-            return;
-          }
-        }
-
-        const isRight = stepCount % 2 === 0;
-        const src = isRight ? './footprint1.png' : './footprint.png';
-
-        const footprint = document.createElement('a-entity');
-        footprint.setAttribute('geometry', 'primitive: plane; width: 0.25; height: 0.15');
-        footprint.setAttribute('material', `src: ${src}; transparent: true; side: double`);
-        footprint.setAttribute('position', `${intersection.x} 0.01 ${intersection.z}`);
-        footprint.setAttribute('rotation', '-90 0 0');
-        
-        // Анімація появи
-        footprint.setAttribute('animation', {
-          property: 'scale',
-          from: '0 0 0',
-          to: '1 1 1',
-          dur: 600,
-          easing: 'easeOutBack'
-        });
-
-        floor.appendChild(footprint);
-        footprints.push(footprint);
-        lastFootprintPosition = intersection.clone();
-        stepCount++;
-
-        // Видаляємо старі сліди
-        if (footprints.length > 8) {
-          const oldest = footprints.shift();
-          if (oldest.parentNode) {
-            oldest.parentNode.removeChild(oldest);
-          }
-        }
-
-        if (stepCount === 5) {
-          setTimeout(showReward, 700);
-        }
-      }
-    }
-
-    function showReward() {
-      hint.textContent = '🎉 Молодець! Ти знайшов скарб знань!';
-
-      const reward = document.createElement('a-entity');
-      reward.setAttribute('text', {
-        value: 'Молодець! 🎉\nСкарб знань відкрито!',
-        align: 'center',
-        color: '#d1006c',
-        width: 3
-      });
-      reward.setAttribute('position', '0 1.5 -2');
-      
-      reward.setAttribute('animation', {
-        property: 'scale',
-        from: '0 0 0',
-        to: '1.5 1.5 1.5',
-        dur: 1000,
-        easing: 'easeOutElastic'
-      });
-      
-      floor.appendChild(reward);
-
-      if (typeof confetti === 'function') {
-        confetti({
-          particleCount: 150,
-          spread: 90,
-          origin: { y: 0.6 },
-          colors: ['#ff0044', '#ffa500', '#ffff00', '#00ff00', '#0066ff']
-        });
-      }
-    }
-
-    window.addEventListener('error', function(e) {
-      console.error('Помилка:', e.error);
+    // Клацання на ключ
+    key.addEventListener("click", () => {
+      key.setAttribute("visible", "false");
+      task.setAttribute("visible", "true");
     });
   </script>
 </body>
 </html>
+</html>
+
