@@ -1,112 +1,95 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR Сліди</title>
-
-  <!-- AR.js -->
-  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/ar.js@latest/build/aframe-ar.min.js"></script>
-
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-    }
-    .ui {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1000;
-      display: flex;
-      gap: 10px;
-      background: rgba(0,0,0,0.6);
-      padding: 10px;
-      border-radius: 10px;
-    }
-    button {
-      padding: 10px 15px;
-      border: none;
-      border-radius: 5px;
-      background: #007bff;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:disabled {
-      background: #ccc;
-    }
-  </style>
+    <meta charset="utf-8" />
+    <title>MindAR Game: Neon Green Footprints</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mindar-image-aframe@1.2.0/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; }
+    </style>
 </head>
 <body>
 
-  <!-- Постійна кнопка SmartLessa -->
-  <div style="position:fixed; bottom:10px; left:50%; transform:translateX(-50%);
-              background:orange; color:black; font-weight:bold; padding:8px 16px; 
-              border-radius:12px; font-family:sans-serif; z-index:999;">
-    SmartLessa
-  </div>
-
-  <!-- AR Сцена -->
-  <a-scene embedded arjs>
+<a-scene 
+    mindar-image="imageTargetSrc: ./my-marker.mind; autoStart: true;" 
+    color-space="sRGB" 
+    renderer="colorManagement: true, physicallyCorrectLights: true" 
+    vr-mode-ui="enabled: false" 
+    device-orientation-permission-ui="enabled: false">
+    
     <a-assets>
-      <!-- Завантажуємо ваші файли -->
-      <img id="footprint" src="https://raw.githubusercontent.com/Lessa2332/AR-Footprints-Game/main/footprint.png" />
-      <img id="footprint1" src="https://raw.githubusercontent.com/Lessa2332/AR-Footprints-Game/main/footprint1.png" />
+        <img id="footprint1-texture" src="./footprint.png">
+        <img id="footprint2-texture" src="./footprint1.png">
     </a-assets>
 
-    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    <a-entity mindar-image-target="targetIndex: 0" id="game-target">
+        
+        <a-entity id="ar-game-container" visible="false">
+            <a-plane id="step1" class="step" width="0.1" height="0.1" rotation="-90 0 0" position="0 0.001 -0.15" visible="false"
+                     material="src: #footprint1-texture; transparent: true; emissive: #00ff00; emissiveIntensity: 0.8;"></a-plane>
+            <a-plane id="step2" class="step" width="0.1" height="0.1" rotation="-90 0 0" position="0 0.001 -0.30" visible="false"
+                     material="src: #footprint2-texture; transparent: true; emissive: #00ff00; emissiveIntensity: 0.8;"></a-plane>
+            <a-plane id="step3" class="step" width="0.1" height="0.1" rotation="-90 0 0" position="0 0.001 -0.45" visible="false"
+                     material="src: #footprint1-texture; transparent: true; emissive: #00ff00; emissiveIntensity: 0.8;"></a-plane>
+            
+            <a-text id="congratulations-text" value="Вітаю!" position="0 0.05 -0.60" scale="0.1 0.1 0.1" rotation="-90 0 0" visible="false"
+                    color="#00ff00" align="center" font="dejavu"></a-text>
+        </a-entity>
+    </a-entity>
 
-    <!-- Маркер Hiro -->
-    <a-marker preset="hiro">
-      <!-- 8 слідів: чергування лівий → правий → лівий → ... -->
-      <a-image src="#footprint"  id="foot1" position="0 0 -0.1" rotation="-90 0 0" scale="0.5 0.5 0.5" visible="true"></a-image>
-      <a-image src="#footprint1" id="foot2" position="0 0 -0.3" rotation="-90 0 0" scale="0.5 0.5 0.5" visible="false"></a-image>
-      <a-image src="#footprint"  id="foot3" position="0 0 -0.5" rotation="-90 0 0" scale="0.5 0.5 0.5" visible="false"></a-image>
-      <a-image src="#footprint1" id="foot4" position="0 0 -0.7" rotation="-90 0 0" scale="0.5 0.5 0.5" visible="false"></a-image>
-      <a-image src="#footprint"  id="foot5" position="0 0 -0.9" rotation="-90 0 0" scale="0.5 0.5 0.5" visible="false"></a-image>
-      <a-image src="#footprint1" id="foot6" position="0 0 -1.1" rotation="-90 0 0" scale="0.5 0.5 0.5" visible="false"></a-image>
-      <a-image src="#footprint"  id="foot7" position="0 0 -1.3" rotation="-90 0 0" scale="0.5 0.5 0.5" visible="false"></a-image>
-      <a-image src="#footprint1" id="foot8" position="0 0 -1.5" rotation="-90 0 0" scale="0.5 0.5 0.5" visible="false"></a-image>
+    <a-entity camera mindar-image-camera></a-entity>
 
-      <!-- Ключ -->
-      <a-text id="key" value="🔑" position="0 0 -1.8" scale="2 2 2" visible="false"
-              color="yellow"
-              animation="property: rotation; to: 0 360 0; loop: true; dur: 2000"></a-text>
+</a-scene>
 
-      <!-- Текст завдання -->
-      <a-text id="task" value="Привіт! Це твоє завдання." position="0 0.5 -1.5" scale="2 2 2" visible="false" color="red"></a-text>
-    </a-marker>
-  </a-scene>
+<script>
+    // КОМПОНЕНТ ЛОГІКИ ГРИ (АДАПТОВАНИЙ ПІД ПОДІЇ MINDAR)
+    AFRAME.registerComponent('mindar-game-logic', {
+        init: function() {
+            const target = this.el; // <a-entity mindar-image-target>
+            const container = document.getElementById('ar-game-container');
+            const steps = [
+                document.getElementById('step1'),
+                document.getElementById('step2'),
+                document.getElementById('step3')
+            ];
+            const congratsText = document.getElementById('congratulations-text');
+            
+            let stepIndex = 0;
+            let stepInterval;
+            
+            // MindAR використовує події targetFound
+            target.addEventListener('targetFound', function() {
+                console.log('Ціль знайдено!');
+                container.setAttribute('visible', 'true');
+                stepIndex = 0;
+                steps.forEach(step => step.setAttribute('visible', 'false'));
+                congratsText.setAttribute('visible', 'false');
 
-  <script>
-    // Зчитуємо всі сліди
-    const steps = [];
-    for (let i = 1; i <= 8; i++) {
-      steps.push(document.getElementById(`foot${i}`));
-    }
-    const key = document.getElementById("key");
-    const task = document.getElementById("task");
+                // Запускаємо анімацію появи слідів (1.5 секунди між кроками)
+                stepInterval = setInterval(() => {
+                    if (stepIndex < steps.length) {
+                        steps[stepIndex].setAttribute('visible', 'true');
+                        stepIndex++;
+                    } else {
+                        clearInterval(stepInterval);
+                        congratsText.setAttribute('visible', 'true');
+                    }
+                }, 1500); 
+            });
 
-    // Логіка клацання слідів
-    steps.forEach((foot, idx) => {
-      foot.addEventListener("click", () => {
-        foot.setAttribute("visible", "false");
-        if (idx < steps.length - 1) {
-          steps[idx + 1].setAttribute("visible", "true");
-        } else {
-          key.setAttribute("visible", "true");
+            target.addEventListener('targetLost', function() {
+                console.log('Ціль втрачено!');
+                clearInterval(stepInterval);
+                container.setAttribute('visible', 'false');
+                steps.forEach(step => step.setAttribute('visible', 'false'));
+                congratsText.setAttribute('visible', 'false');
+            });
         }
-      });
     });
 
-    // Клацання на ключ
-    key.addEventListener("click", () => {
-      key.setAttribute("visible", "false");
-      task.setAttribute("visible", "true");
-    });
-  </script>
+    // Застосовуємо компонент до MindAR-цілі
+    document.querySelector('[mindar-image-target]').setAttribute('mindar-game-logic', '');
+</script>
 </body>
 </html>
