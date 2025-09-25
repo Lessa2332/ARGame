@@ -29,28 +29,45 @@
         vr-mode-ui="enabled: false" 
         device-orientation-permission-ui="enabled: false"
         loading-screen="enabled: false">
+        
         <a-assets>
             <img id="footprint1-texture" src="./footprint.png" crossorigin="anonymous">
+            <img id="footprint2-texture" src="./footprint1.png" crossorigin="anonymous">
             <a-asset-item id="roboto-font" src="https://cdn.aframe.io/fonts/Roboto-msdf.json"></a-asset-item>
         </a-assets>
 
         <a-entity mindar-image-target="targetIndex: 0" mindar-game-logic id="game-target">
             <a-entity id="ar-game-container" visible="false">
-<a-image 
-    id="step1" 
-    class="step" 
-    width="0.5" 
-    height="0.5" 
-    rotation="-90 0 0" 
-    position="0 0.01 0" 
-    visible="false"
-    src="#footprint1-texture" 
-    material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;">
-</a-image>
+                <!-- Перший слід -->
+                <a-image 
+                    id="step1" 
+                    class="step clickable" 
+                    width="0.5" 
+                    height="0.5" 
+                    rotation="-90 0 0" 
+                    position="0 0.01 0" 
+                    visible="false"
+                    src="#footprint1-texture" 
+                    material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;">
+                </a-image>
+
+                <!-- Другий слід (з'являється після кліку) -->
+                <a-image 
+                    id="step2" 
+                    class="step" 
+                    width="0.5" 
+                    height="0.5" 
+                    rotation="-90 0 0" 
+                    position="0 0.01 -0.5" 
+                    visible="false"
+                    src="#footprint2-texture" 
+                    material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;">
+                </a-image>
                 
                 <a-text id="congratulations-text" value="ВІТАЮ!" position="0 0.2 -0.15" scale="0.1 0.1 0.1" rotation="-90 0 0" visible="false"
                         color="#00ff00" align="center" font="#roboto-font" wrap-count="20"
-                        animation="property: scale; to: 0.15 0.15 0.15; dir: alternate; loop: true; dur: 800; startEvents: animate-congrats;"></a-text>
+                        animation="property: scale; to: 0.15 0.15 0.15; dir: alternate; loop: true; dur: 800; startEvents: animate-congrats;">
+                </a-text>
             </a-entity>
         </a-entity>
 
@@ -63,36 +80,46 @@
                 const target = this.el;
                 const container = document.getElementById('ar-game-container');
                 const step1 = document.getElementById('step1');
+                const step2 = document.getElementById('step2');
                 const congratsText = document.getElementById('congratulations-text');
 
-                // Перевірка завантаження текстури
-                const texture = document.getElementById('footprint1-texture');
-                texture.addEventListener('load', () => {
-                    console.log('Текстура footprint.png завантажена успішно');
-                });
-                texture.addEventListener('error', () => {
-                    console.error('Помилка завантаження текстури footprint.png');
+                // Завантаження текстур
+                const textures = ['footprint1-texture', 'footprint2-texture'];
+                textures.forEach(id => {
+                    const img = document.getElementById(id);
+                    img.addEventListener('load', () => console.log(`✅ Текстура ${id} завантажена`));
+                    img.addEventListener('error', () => console.error(`❌ Помилка завантаження ${id}`));
                 });
 
+                // Поява/зникнення маркера
                 target.addEventListener('targetFound', () => {
-                    console.log('Ціль знайдено! 🟢', target);
+                    console.log('🟢 Ціль знайдено!');
                     document.getElementById('loader').style.display = 'none';
                     container.setAttribute('visible', true);
                     step1.setAttribute('visible', true);
+                    step2.setAttribute('visible', false);
                     congratsText.setAttribute('visible', false);
                 });
 
                 target.addEventListener('targetLost', () => {
-                    console.log('Ціль втрачено! 🔴', target);
+                    console.log('🔴 Ціль втрачено!');
                     container.setAttribute('visible', false);
                     step1.setAttribute('visible', false);
+                    step2.setAttribute('visible', false);
                     congratsText.setAttribute('visible', false);
                     document.getElementById('loader').style.display = 'block';
+                });
+
+                // 🔥 Клік на перший слід
+                step1.addEventListener('click', () => {
+                    console.log('👣 Клік по першому сліду — показуємо другий!');
+                    step2.setAttribute('visible', true);
+                    // Опціонально: показати текст "ВІТАЮ!"
+                    // congratsText.setAttribute('visible', true);
+                    // congratsText.emit('animate-congrats');
                 });
             }
         });
     </script>
 </body>
 </html>
-
-
