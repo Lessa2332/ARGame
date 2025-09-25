@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>Відбитки стоп — Дитяче свято!</title>
+    <title>Відбитки стоп — Дитяче свято! (Фінальна версія)</title>
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     <style>
@@ -13,14 +13,14 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: white;
-            font-size: 2em;
+            font-size: 1.5em;
             z-index: 10;
             text-shadow: 0 0 10px #00ff00;
         }
     </style>
 </head>
 <body>
-    <div id="loader">Наведи камеру на маркер...</div>
+    <div id="loader">Наведіть камеру на маркер та натискайте на сліди! 👣</div>
 
     <a-scene 
         mindar-image="imageTargetSrc: ./my-marker.mind; autoStart: true;" 
@@ -31,7 +31,6 @@
         loading-screen="enabled: false">
 
         <a-assets>
-            <!-- Лише два файли -->
             <img id="left-foot"  src="./footprint1.png" crossorigin="anonymous">
             <img id="right-foot" src="./footprint2.png" crossorigin="anonymous">
             <a-asset-item id="roboto-font" src="https://cdn.aframe.io/fonts/Roboto-msdf.json"></a-asset-item>
@@ -39,18 +38,22 @@
 
         <a-entity mindar-image-target="targetIndex: 0" mindar-game-logic id="game-target">
             <a-entity id="ar-game-container" visible="false">
-                <!-- 6 слідів, чергуючи ліву та праву -->
-                <a-image id="step1" class="step clickable" width="1.0" height="1.0" rotation="-90 0 0" position="0 0.01 0"    visible="false" src="#left-foot"  material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step2" class="step clickable" width="1.0" height="1.0" rotation="-90 0 0" position="0 0.01 -0.3" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step3" class="step clickable" width="1.0" height="1.0" rotation="-90 0 0" position="0 0.01 -0.6" visible="false" src="#left-foot"  material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step4" class="step clickable" width="1.0" height="1.0" rotation="-90 0 0" position="0 0.01 -0.9" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step5" class="step clickable" width="1.0" height="1.0" rotation="-90 0 0" position="0 0.01 -1.2" visible="false" src="#left-foot"  material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step6" class="step clickable" width="1.0" height="1.0" rotation="-90 0 0" position="0 0.01 -1.5" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step1" class="step clickable" width="0.6" height="0.6" rotation="-90 0 0" position="0 0.01 0"    visible="false" src="#left-foot"  material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"
+                         animation__fade="property: material.opacity; from: 1; to: 0; dur: 200; startEvents: click;"></a-image>
+                <a-image id="step2" class="step clickable" width="0.6" height="0.6" rotation="-90 0 0" position="0 0.01 -0.7" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"
+                         animation__fade="property: material.opacity; from: 1; to: 0; dur: 200; startEvents: click;"></a-image>
+                <a-image id="step3" class="step clickable" width="0.6" height="0.6" rotation="-90 0 0" position="0 0.01 -1.4" visible="false" src="#left-foot"  material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"
+                         animation__fade="property: material.opacity; from: 1; to: 0; dur: 200; startEvents: click;"></a-image>
+                <a-image id="step4" class="step clickable" width="0.6" height="0.6" rotation="-90 0 0" position="0 0.01 -2.1" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"
+                         animation__fade="property: material.opacity; from: 1; to: 0; dur: 200; startEvents: click;"></a-image>
+                <a-image id="step5" class="step clickable" width="0.6" height="0.6" rotation="-90 0 0" position="0 0.01 -2.8" visible="false" src="#left-foot"  material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"
+                         animation__fade="property: material.opacity; from: 1; to: 0; dur: 200; startEvents: click;"></a-image>
+                <a-image id="step6" class="step clickable" width="0.6" height="0.6" rotation="-90 0 0" position="0 0.01 -3.5" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"
+                         animation__fade="property: material.opacity; from: 1; to: 0; dur: 200; startEvents: click;"></a-image>
 
-                <!-- Анімований текст "ВІТАЮ!" -->
                 <a-text id="congratulations-text" 
-                        value="ВІТАЮ!" 
-                        position="0 0.3 -0.75" 
+                        value="ВІТАЮ!\nТи це зробив!" 
+                        position="0 0.35 -2.1" 
                         scale="0.12 0.12 0.12" 
                         rotation="-90 0 0" 
                         visible="false"
@@ -58,13 +61,12 @@
                         align="center" 
                         font="#roboto-font" 
                         wrap-count="12"
-                        animation__bounce="property: position; to: 0 0.45 -0.75; dur: 800; easing: easeInOutQuad; loop: true; dir: alternate"
+                        animation__bounce="property: position; to: 0 0.5 -2.1; dur: 800; easing: easeInOutQuad; loop: true; dir: alternate"
                         animation__pulse="property: scale; from: 0.12 0.12 0.12; to: 0.2 0.2 0.2; dur: 1000; easing: easeInOutSine; loop: true; dir: alternate">
                 </a-text>
             </a-entity>
         </a-entity>
 
-        <!-- Курсор для надійного кліку -->
         <a-camera 
             mindar-image-camera 
             cursor="rayOrigin: mouse" 
@@ -86,37 +88,51 @@
                     document.getElementById('step6')
                 ];
                 const congratsText = document.getElementById('congratulations-text');
+                const FADE_DURATION = 200; // Тривалість анімації зникнення
 
-                // Завантаження текстур
-                ['left-foot', 'right-foot'].forEach(id => {
-                    const img = document.getElementById(id);
-                    img?.addEventListener('load', () => console.log(`✅ ${id} завантажено`));
-                    img?.addEventListener('error', () => console.error(`❌ ${id} не знайдено`));
-                });
+                // Функція для скидання матеріалу (прозорості) сліду
+                const resetStep = (step) => {
+                    step.setAttribute('material', 'opacity', 1);
+                    step.setAttribute('visible', false);
+                };
 
                 target.addEventListener('targetFound', () => {
                     document.getElementById('loader').style.display = 'none';
+                    
+                    steps.forEach(step => resetStep(step)); 
+                    
                     container.setAttribute('visible', true);
                     steps[0].setAttribute('visible', true);
                     congratsText.setAttribute('visible', false);
+                    
+                    congratsText.setAttribute('animation__bounce', 'property: position; to: 0 0.5 -2.1; dur: 800; easing: easeInOutQuad; loop: true; dir: alternate');
+                    congratsText.setAttribute('animation__pulse', 'property: scale; from: 0.12 0.12 0.12; to: 0.2 0.2 0.2; dur: 1000; easing: easeInOutSine; loop: true; dir: alternate');
                 });
 
                 target.addEventListener('targetLost', () => {
                     container.setAttribute('visible', false);
-                    steps.forEach(step => step.setAttribute('visible', false));
+                    steps.forEach(step => resetStep(step));
                     congratsText.setAttribute('visible', false);
                     document.getElementById('loader').style.display = 'block';
+
+                    congratsText.removeAttribute('animation__bounce'); 
+                    congratsText.removeAttribute('animation__pulse'); 
                 });
 
-                // Кліки: кожен слід показує наступний, останній — текст
+                // Логіка гри (Кліки)
                 steps.forEach((step, index) => {
                     step.addEventListener('click', () => {
-                        step.setAttribute('visible', false);
-                        if (index < 5) {
-                            steps[index + 1].setAttribute('visible', true);
-                        } else {
-                            congratsText.setAttribute('visible', true);
-                        }
+                        // Клік запускає анімацію зникнення (opacity: 1 -> 0)
+                        
+                        setTimeout(() => {
+                            resetStep(step);
+                            
+                            if (index < 5) {
+                                steps[index + 1].setAttribute('visible', true);
+                            } else {
+                                congratsText.setAttribute('visible', true);
+                            }
+                        }, FADE_DURATION);
                     });
                 });
             }
