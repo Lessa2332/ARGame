@@ -30,19 +30,17 @@
         device-orientation-permission-ui="enabled: false"
         loading-screen="enabled: false">
         <a-assets>
-            <img id="footprint1-texture" src="./footprint.png" crossorigin="anonymous">
-            <img id="footprint2-texture" src="./footprint1.png" crossorigin="anonymous">
             <a-asset-item id="roboto-font" src="https://cdn.aframe.io/fonts/Roboto-msdf.json"></a-asset-item>
         </a-assets>
 
         <a-entity mindar-image-target="targetIndex: 0" mindar-game-logic id="game-target">
             <a-entity id="ar-game-container" visible="false">
-                <a-plane id="step1" class="step" width="0.3" height="0.3" rotation="-90 0 0" position="0 0.1 0" visible="false"
-                         material="src: #footprint1-texture; transparent: true; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-plane>
-                <a-plane id="step2" class="step" width="0.3" height="0.3" rotation="-90 0 0" position="0 0.1 -0.15" visible="false"
-                         material="src: #footprint2-texture; transparent: true; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-plane>
-                <a-plane id="step3" class="step" width="0.3" height="0.3" rotation="-90 0 0" position="0 0.1 -0.30" visible="false"
-                         material="src: #footprint1-texture; transparent: true; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-plane>
+                <a-cone id="step1" class="step" radius-bottom="0.1" height="0.2" rotation="0 0 0" position="0 0.1 0" visible="false"
+                        material="color: #00ff00; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-cone>
+                <a-cone id="step2" class="step" radius-bottom="0.1" height="0.2" rotation="0 0 0" position="0 0.1 -0.15" visible="false"
+                        material="color: #00ff00; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-cone>
+                <a-cone id="step3" class="step" radius-bottom="0.1" height="0.2" rotation="0 0 0" position="0 0.1 -0.30" visible="false"
+                        material="color: #00ff00; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-cone>
                 
                 <a-text id="congratulations-text" value="ВІТАЮ!" position="0 0.2 -0.45" scale="0.1 0.1 0.1" rotation="-90 0 0" visible="false"
                         color="#00ff00" align="center" font="#roboto-font" wrap-count="20"
