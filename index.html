@@ -36,8 +36,8 @@
 
         <a-entity mindar-image-target="targetIndex: 0" mindar-game-logic id="game-target">
             <a-entity id="ar-game-container" visible="false">
-                <a-plane id="step1" class="step" width="0.3" height="0.3" rotation="-90 0 0" position="0 0.1 0" visible="false"
-                         material="src: #footprint1-texture; transparent: true; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-plane>
+                <a-image id="step1" class="step" width="0.3" height="0.3" rotation="-90 0 0" position="0 0.1 0" visible="false"
+                         src="#footprint1-texture" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
                 
                 <a-text id="congratulations-text" value="ВІТАЮ!" position="0 0.2 -0.15" scale="0.1 0.1 0.1" rotation="-90 0 0" visible="false"
                         color="#00ff00" align="center" font="#roboto-font" wrap-count="20"
@@ -55,6 +55,15 @@
                 const container = document.getElementById('ar-game-container');
                 const step1 = document.getElementById('step1');
                 const congratsText = document.getElementById('congratulations-text');
+
+                // Перевірка завантаження текстури
+                const texture = document.getElementById('footprint1-texture');
+                texture.addEventListener('load', () => {
+                    console.log('Текстура footprint.png завантажена успішно');
+                });
+                texture.addEventListener('error', () => {
+                    console.error('Помилка завантаження текстури footprint.png');
+                });
 
                 target.addEventListener('targetFound', () => {
                     console.log('Ціль знайдено! 🟢', target);
