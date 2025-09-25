@@ -30,19 +30,16 @@
         device-orientation-permission-ui="enabled: false"
         loading-screen="enabled: false">
         <a-assets>
+            <img id="footprint1-texture" src="./footprint.png" crossorigin="anonymous">
             <a-asset-item id="roboto-font" src="https://cdn.aframe.io/fonts/Roboto-msdf.json"></a-asset-item>
         </a-assets>
 
         <a-entity mindar-image-target="targetIndex: 0" mindar-game-logic id="game-target">
             <a-entity id="ar-game-container" visible="false">
-                <a-cone id="step1" class="step" radius-bottom="0.1" height="0.2" rotation="0 0 0" position="0 0.1 0" visible="false"
-                        material="color: #00ff00; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-cone>
-                <a-cone id="step2" class="step" radius-bottom="0.1" height="0.2" rotation="0 0 0" position="0 0.1 -0.15" visible="false"
-                        material="color: #00ff00; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-cone>
-                <a-cone id="step3" class="step" radius-bottom="0.1" height="0.2" rotation="0 0 0" position="0 0.1 -0.30" visible="false"
-                        material="color: #00ff00; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-cone>
+                <a-plane id="step1" class="step" width="0.3" height="0.3" rotation="-90 0 0" position="0 0.1 0" visible="false"
+                         material="src: #footprint1-texture; transparent: true; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-plane>
                 
-                <a-text id="congratulations-text" value="ВІТАЮ!" position="0 0.2 -0.45" scale="0.1 0.1 0.1" rotation="-90 0 0" visible="false"
+                <a-text id="congratulations-text" value="ВІТАЮ!" position="0 0.2 -0.15" scale="0.1 0.1 0.1" rotation="-90 0 0" visible="false"
                         color="#00ff00" align="center" font="#roboto-font" wrap-count="20"
                         animation="property: scale; to: 0.15 0.15 0.15; dir: alternate; loop: true; dur: 800; startEvents: animate-congrats;"></a-text>
             </a-entity>
@@ -56,45 +53,21 @@
             init: function() {
                 const target = this.el;
                 const container = document.getElementById('ar-game-container');
-                const steps = [
-                    document.getElementById('step1'),
-                    document.getElementById('step2'),
-                    document.getElementById('step3')
-                ];
+                const step1 = document.getElementById('step1');
                 const congratsText = document.getElementById('congratulations-text');
-                const STEP_DELAY = 1000;
-
-                let timeoutRef;
-
-                const showNextStep = (index) => {
-                    if (!container.getAttribute('visible')) return;
-
-                    if (index < steps.length) {
-                        steps[index].setAttribute('visible', true);
-                        timeoutRef = setTimeout(() => {
-                            showNextStep(index + 1);
-                        }, STEP_DELAY);
-                    } else {
-                        congratsText.setAttribute('visible', true);
-                        congratsText.emit('animate-congrats');
-                    }
-                };
 
                 target.addEventListener('targetFound', () => {
                     console.log('Ціль знайдено! 🟢', target);
                     document.getElementById('loader').style.display = 'none';
-                    clearTimeout(timeoutRef);
                     container.setAttribute('visible', true);
-                    steps.forEach(step => step.setAttribute('visible', false));
+                    step1.setAttribute('visible', true);
                     congratsText.setAttribute('visible', false);
-                    showNextStep(0);
                 });
 
                 target.addEventListener('targetLost', () => {
                     console.log('Ціль втрачено! 🔴', target);
-                    clearTimeout(timeoutRef);
                     container.setAttribute('visible', false);
-                    steps.forEach(step => step.setAttribute('visible', false));
+                    step1.setAttribute('visible', false);
                     congratsText.setAttribute('visible', false);
                     document.getElementById('loader').style.display = 'block';
                 });
