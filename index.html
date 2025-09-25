@@ -31,7 +31,6 @@
         loading-screen="enabled: false">
 
         <a-assets>
-            <!-- Лише два файли для лівої та правої стопи -->
             <img id="left-foot"  src="./footprint1.png" crossorigin="anonymous">
             <img id="right-foot" src="./footprint2.png" crossorigin="anonymous">
             <a-asset-item id="roboto-font" src="https://cdn.aframe.io/fonts/Roboto-msdf.json"></a-asset-item>
@@ -39,13 +38,13 @@
 
         <a-entity mindar-image-target="targetIndex: 0" mindar-game-logic id="game-target">
             <a-entity id="ar-game-container" visible="false">
-                <!-- 6 слідів, чергуючи ліву та праву, кожен на 30 см попереду -->
-                <a-image id="step1" class="step clickable" width="0.5" height="0.5" rotation="-90 0 0" position="0 0.01 0"    visible="false" src="#left-foot"  material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step2" class="step clickable" width="0.5" height="0.5" rotation="-90 0 0" position="0 0.01 -0.3" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step3" class="step clickable" width="0.5" height="0.5" rotation="-90 0 0" position="0 0.01 -0.6" visible="false" src="#left-foot"  material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step4" class="step clickable" width="0.5" height="0.5" rotation="-90 0 0" position="0 0.01 -0.9" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step5" class="step clickable" width="0.5" height="0.5" rotation="-90 0 0" position="0 0.01 -1.2" visible="false" src="#left-foot"  material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step6" class="step clickable" width="0.5" height="0.5" rotation="-90 0 0" position="0 0.01 -1.5" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <!-- 6 великих слідів (1.5 м × 1.5 м), кожен на 30 см попереду -->
+                <a-image id="step1" class="step clickable" width="1.5" height="1.5" rotation="-90 0 0" position="0 0.02 0"    visible="false" src="#left-foot"  material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step2" class="step clickable" width="1.5" height="1.5" rotation="-90 0 0" position="0 0.02 -0.3" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step3" class="step clickable" width="1.5" height="1.5" rotation="-90 0 0" position="0 0.02 -0.6" visible="false" src="#left-foot"  material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step4" class="step clickable" width="1.5" height="1.5" rotation="-90 0 0" position="0 0.02 -0.9" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step5" class="step clickable" width="1.5" height="1.5" rotation="-90 0 0" position="0 0.02 -1.2" visible="false" src="#left-foot"  material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step6" class="step clickable" width="1.5" height="1.5" rotation="-90 0 0" position="0 0.02 -1.5" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
 
                 <!-- Анімований текст "ВІТАЮ!" -->
                 <a-text id="congratulations-text" 
@@ -64,7 +63,7 @@
             </a-entity>
         </a-entity>
 
-        <!-- Курсор для кліків (працює на мобілці!) -->
+        <!-- Курсор для кліків -->
         <a-camera 
             mindar-image-camera 
             cursor="rayOrigin: mouse" 
@@ -113,14 +112,13 @@
                         congratsText.setAttribute('visible', false);
                         document.getElementById('loader').style.display = 'block';
                     }
-                    // Якщо гра вже почалася — сліди залишаються!
                 });
 
-                // Обробка кліків по слідах
+                // Обробка кліків
                 steps.forEach((step, index) => {
                     step.addEventListener('click', () => {
                         if (!gameStarted) {
-                            gameStarted = true; // 🚀 гра почалася!
+                            gameStarted = true;
                         }
                         step.setAttribute('visible', false);
                         if (index < 5) {
