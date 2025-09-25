@@ -4,113 +4,104 @@
     <meta charset="utf-8" />
     <title>MindAR Game: Neon Green Footprints (Оновлено)</title>
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
     <style>
         body { margin: 0; overflow: hidden; }
+        #loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 2em;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
+    <div id="loader">Наведи камеру на маркер...</div>
 
-<a-scene 
-    mindar-image="imageTargetSrc: ./my-marker.mind; autoStart: true;" 
-    color-space="sRGB" 
-    renderer="colorManagement: true, physicallyCorrectLights: true" 
-    vr-mode-ui="enabled: false" 
-    device-orientation-permission-ui="enabled: false"
-    loading-screen="enabled: false"> <a-assets>
-        <img id="footprint1-texture" src="./footprint.png" crossorigin="anonymous">
-        <img id="footprint2-texture" src="./footprint1.png" crossorigin="anonymous">
-        
-        <a-asset-item id="roboto-font" src="https://cdn.aframe.io/fonts/Roboto-msdf.json"></a-asset-item>
-    </a-assets>
+    <a-scene 
+        mindar-image="imageTargetSrc: ./my-marker.mind; autoStart: true;" 
+        color-space="sRGB" 
+        renderer="colorManagement: true, physicallyCorrectLights: true" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false"
+        loading-screen="enabled: false">
+        <a-assets>
+            <img id="footprint1-texture" src="./footprint.png" crossorigin="anonymous">
+            <img id="footprint2-texture" src="./footprint1.png" crossorigin="anonymous">
+            <a-asset-item id="roboto-font" src="https://cdn.aframe.io/fonts/Roboto-msdf.json"></a-asset-item>
+        </a-assets>
 
-    <a-entity mindar-image-target="targetIndex: 0" mindar-game-logic id="game-target">
-        <a-entity id="ar-game-container" visible="false">
-            <a-plane id="step1" class="step" width="0.1" height="0.1" rotation="-90 0 0" position="0 0.001 -0.15" visible="false"
-                     material="src: #footprint1-texture; transparent: true; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-plane>
-            <a-plane id="step2" class="step" width="0.1" height="0.1" rotation="-90 0 0" position="0 0.001 -0.30" visible="false"
-                     material="src: #footprint2-texture; transparent: true; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-plane>
-            <a-plane id="step3" class="step" width="0.1" height="0.1" rotation="-90 0 0" position="0 0.001 -0.45" visible="false"
-                     material="src: #footprint1-texture; transparent: true; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-plane>
-            
-            <a-text id="congratulations-text" value="ВІТАЮ!" position="0 0.05 -0.60" scale="0.1 0.1 0.1" rotation="-90 0 0" visible="false"
-                    color="#00ff00" align="center" font="#roboto-font" wrap-count="20"
-                    animation="property: scale; to: 0.15 0.15 0.15; dir: alternate; loop: true; dur: 800; startEvents: animate-congrats;"></a-text>
+        <a-entity mindar-image-target="targetIndex: 0" mindar-game-logic id="game-target">
+            <a-entity id="ar-game-container" visible="false">
+                <a-plane id="step1" class="step" width="0.1" height="0.1" rotation="-90 0 0" position="0 0.001 -0.15" visible="false"
+                         material="src: #footprint1-texture; transparent: true; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-plane>
+                <a-plane id="step2" class="step" width="0.1" height="0.1" rotation="-90 0 0" position="0 0.001 -0.30" visible="false"
+                         material="src: #footprint2-texture; transparent: true; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-plane>
+                <a-plane id="step3" class="step" width="0.1" height="0.1" rotation="-90 0 0" position="0 0.001 -0.45" visible="false"
+                         material="src: #footprint1-texture; transparent: true; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-plane>
+                
+                <a-text id="congratulations-text" value="ВІТАЮ!" position="0 0.05 -0.60" scale="0.1 0.1 0.1" rotation="-90 0 0" visible="false"
+                        color="#00ff00" align="center" font="#roboto-font" wrap-count="20"
+                        animation="property: scale; to: 0.15 0.15 0.15; dir: alternate; loop: true; dur: 800; startEvents: animate-congrats;"></a-text>
+            </a-entity>
         </a-entity>
-    </a-entity>
 
-    <a-entity camera mindar-image-camera></a-entity>
+        <a-camera mindar-image-camera></a-camera>
+    </a-scene>
 
-</a-scene>
+    <script>
+        AFRAME.registerComponent('mindar-game-logic', {
+            init: function() {
+                const target = this.el;
+                const container = document.getElementById('ar-game-container');
+                const steps = [
+                    document.getElementById('step1'),
+                    document.getElementById('step2'),
+                    document.getElementById('step3')
+                ];
+                const congratsText = document.getElementById('congratulations-text');
+                const STEP_DELAY = 1000;
 
-<script>
-    AFRAME.registerComponent('mindar-game-logic', {
-        init: function() {
-            const target = this.el;
-            const container = document.getElementById('ar-game-container');
-            const steps = [
-                document.getElementById('step1'),
-                document.getElementById('step2'),
-                document.getElementById('step3')
-            ];
-            const congratsText = document.getElementById('congratulations-text');
-            const STEP_DELAY = 1000; // Час між появою кроків (1 секунда)
-            
-            let timeoutRef; // Використовуємо для зберігання посилання на запланований таймаут
+                let timeoutRef;
 
-            /**
-             * Рекурсивна функція для послідовного відображення кроків.
-             * Це краще, ніж setInterval, оскільки забезпечує контроль над послідовністю.
-             */
-            const showNextStep = (index) => {
-                // Запобігання показу, якщо маркер втрачено
-                if (!container.getAttribute('visible')) return; 
+                const showNextStep = (index) => {
+                    if (!container.getAttribute('visible')) return;
 
-                if (index < steps.length) {
-                    // Показуємо поточний крок
-                    steps[index].setAttribute('visible', true); 
-                    
-                    // Плануємо наступний крок
-                    timeoutRef = setTimeout(() => {
-                        showNextStep(index + 1);
-                    }, STEP_DELAY);
-                } else {
-                    // Усі кроки показано: показуємо текст і запускаємо його анімацію
-                    congratsText.setAttribute('visible', true);
-                    congratsText.emit('animate-congrats');
-                }
-            };
+                    if (index < steps.length) {
+                        steps[index].setAttribute('visible', true);
+                        timeoutRef = setTimeout(() => {
+                            showNextStep(index + 1);
+                        }, STEP_DELAY);
+                    } else {
+                        congratsText.setAttribute('visible', true);
+                        congratsText.emit('animate-congrats');
+                    }
+                };
 
-            target.addEventListener('targetFound', () => {
-                console.log('Ціль знайдено! 🟢');
-                
-                // Очищаємо попередній таймаут на випадок швидкого повторного виявлення
-                clearTimeout(timeoutRef); 
-                
-                // Скидаємо стан сцени
-                container.setAttribute('visible', true);
-                steps.forEach(step => step.setAttribute('visible', false));
-                congratsText.setAttribute('visible', false);
+                target.addEventListener('targetFound', () => {
+                    console.log('Ціль знайдено! 🟢', target);
+                    document.getElementById('loader').style.display = 'none';
+                    clearTimeout(timeoutRef);
+                    container.setAttribute('visible', true);
+                    steps.forEach(step => step.setAttribute('visible', false));
+                    congratsText.setAttribute('visible', false);
+                    showNextStep(0);
+                });
 
-                // Починаємо гру з першого кроку
-                showNextStep(0);
-            });
-
-            target.addEventListener('targetLost', () => {
-                console.log('Ціль втрачено! 🔴');
-                
-                // Очищаємо запланований таймаут, зупиняючи послідовність
-                clearTimeout(timeoutRef); 
-                
-                // Приховуємо всі елементи
-                container.setAttribute('visible', false);
-                steps.forEach(step => step.setAttribute('visible', false));
-                congratsText.setAttribute('visible', false);
-            });
-        }
-    });
-</script>
+                target.addEventListener('targetLost', () => {
+                    console.log('Ціль втрачено! 🔴', target);
+                    clearTimeout(timeoutRef);
+                    container.setAttribute('visible', false);
+                    steps.forEach(step => step.setAttribute('visible', false));
+                    congratsText.setAttribute('visible', false);
+                    document.getElementById('loader').style.display = 'block';
+                });
+            }
+        });
+    </script>
 </body>
 </html>
-
