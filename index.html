@@ -38,20 +38,20 @@
 
         <a-entity mindar-image-target="targetIndex: 0" mindar-game-logic id="game-target">
             <a-entity id="ar-game-container" visible="false">
-                <!-- 6 слідів, кожен на 30 см попереду, над маркером -->
-                <a-image id="step1" class="step clickable" width="1.5" height="1.5" rotation="0 0 0" position="0 0 0.02" visible="false" src="#left-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step2" class="step clickable" width="1.5" height="1.5" rotation="0 0 0" position="0 0 -0.3" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step3" class="step clickable" width="1.5" height="1.5" rotation="0 0 0" position="0 0 -0.6" visible="false" src="#left-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step4" class="step clickable" width="1.5" height="1.5" rotation="0 0 0" position="0 0 -0.9" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step5" class="step clickable" width="1.5" height="1.5" rotation="0 0 0" position="0 0 -1.2" visible="false" src="#left-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step6" class="step clickable" width="1.5" height="1.5" rotation="0 0 0" position="0 0 -1.5" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <!-- 6 слідів, лежать на підлозі, кожен на 30 см попереду -->
+                <a-image id="step1" class="step clickable" width="1.5" height="1.5" rotation="-90 0 0" position="0 0.02 0"    visible="false" src="#left-foot"  material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step2" class="step clickable" width="1.5" height="1.5" rotation="-90 0 0" position="0 0.02 -0.3" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step3" class="step clickable" width="1.5" height="1.5" rotation="-90 0 0" position="0 0.02 -0.6" visible="false" src="#left-foot"  material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step4" class="step clickable" width="1.5" height="1.5" rotation="-90 0 0" position="0 0.02 -0.9" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step5" class="step clickable" width="1.5" height="1.5" rotation="-90 0 0" position="0 0.02 -1.2" visible="false" src="#left-foot"  material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step6" class="step clickable" width="1.5" height="1.5" rotation="-90 0 0" position="0 0.02 -1.5" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
 
                 <!-- Анімований текст "ВІТАЮ!" -->
                 <a-text id="congratulations-text" 
                         value="ВІТАЮ!" 
                         position="0 0.3 -0.75" 
                         scale="0.12 0.12 0.12" 
-                        rotation="0 0 0" 
+                        rotation="-90 0 0" 
                         visible="false"
                         color="#00ff00" 
                         align="center" 
@@ -63,11 +63,19 @@
             </a-entity>
         </a-entity>
 
-        <!-- Курсор -->
+        <!-- Камера з курсором + візуальний курсор -->
         <a-camera 
             mindar-image-camera 
             cursor="rayOrigin: mouse" 
-            raycaster="objects: .clickable">
+            raycaster="objects: .clickable; far: 10">
+            <!-- Візуальний курсор (кружечок) -->
+            <a-entity 
+                cursor="fuse: false; rayOrigin: mouse"
+                position="0 0 -1"
+                geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                material="color: #00ff00; shader: flat"
+                visible="true">
+            </a-entity>
         </a-camera>
     </a-scene>
 
@@ -98,6 +106,7 @@
 
                 // Маркер знайдено
                 target.addEventListener('targetFound', () => {
+                    console.log('🟢 Маркер знайдено!');
                     document.getElementById('loader').style.display = 'none';
                     container.setAttribute('visible', true);
                     steps[0].setAttribute('visible', true);
@@ -107,17 +116,20 @@
                 // Маркер втрачено — ховаємо ТІЛЬКИ якщо гра ще не почалася
                 target.addEventListener('targetLost', () => {
                     if (!gameStarted) {
+                        console.log('🔴 Маркер втрачено — ховаємо сліди');
                         container.setAttribute('visible', false);
                         steps.forEach(step => step.setAttribute('visible', false));
                         congratsText.setAttribute('visible', false);
                         document.getElementById('loader').style.display = 'block';
+                    } else {
+                        console.log('🟡 Гра вже почалася — сліди залишаються');
                     }
-                    // Якщо гра вже почалася — НЕ ховаємо! Сліди залишаються над маркером.
                 });
 
-                // Обробка кліків
+                // Обробка кліків по слідах
                 steps.forEach((step, index) => {
                     step.addEventListener('click', () => {
+                        console.log(`👣 Клік по сліду ${index + 1}`);
                         if (!gameStarted) {
                             gameStarted = true;
                         }
