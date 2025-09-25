@@ -2,12 +2,11 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>MindAR Game: Neon Green Footprints (Оновлено)</title>
+    <title>Відбитки стоп — Дитяче свято!</title>
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; }
+        body { margin: 0; overflow: hidden; background: #000; }
         #loader {
             position: absolute;
             top: 50%;
@@ -16,6 +15,7 @@
             color: white;
             font-size: 2em;
             z-index: 10;
+            text-shadow: 0 0 10px #00ff00;
         }
     </style>
 </head>
@@ -29,40 +29,47 @@
         vr-mode-ui="enabled: false" 
         device-orientation-permission-ui="enabled: false"
         loading-screen="enabled: false">
-        
+
         <a-assets>
-            <img id="footprint1-texture" src="./footprint.png" crossorigin="anonymous">
-            <img id="footprint2-texture" src="./footprint1.png" crossorigin="anonymous">
+            <!-- Лише два файли -->
+            <img id="left-foot"  src="./footprint1.png" crossorigin="anonymous">
+            <img id="right-foot" src="./footprint2.png" crossorigin="anonymous">
             <a-asset-item id="roboto-font" src="https://cdn.aframe.io/fonts/Roboto-msdf.json"></a-asset-item>
         </a-assets>
 
         <a-entity mindar-image-target="targetIndex: 0" mindar-game-logic id="game-target">
             <a-entity id="ar-game-container" visible="false">
-                <!-- Перший слід -->
-                <a-image 
-                    id="step1" 
-                    class="step clickable" 
-                    width="0.5" 
-                    height="0.5" 
-                    rotation="-90 0 0" 
-                    position="0 0.01 0" 
-                    visible="false"
-                    src="#footprint1-texture" 
-                    material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;">
-                </a-image>
+                <!-- 6 слідів, чергуючи ліву та праву -->
+                <a-image id="step1" class="step clickable" width="1.0" height="1.0" rotation="-90 0 0" position="0 0.01 0"    visible="false" src="#left-foot"  material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step2" class="step clickable" width="1.0" height="1.0" rotation="-90 0 0" position="0 0.01 -0.3" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step3" class="step clickable" width="1.0" height="1.0" rotation="-90 0 0" position="0 0.01 -0.6" visible="false" src="#left-foot"  material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step4" class="step clickable" width="1.0" height="1.0" rotation="-90 0 0" position="0 0.01 -0.9" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step5" class="step clickable" width="1.0" height="1.0" rotation="-90 0 0" position="0 0.01 -1.2" visible="false" src="#left-foot"  material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step6" class="step clickable" width="1.0" height="1.0" rotation="-90 0 0" position="0 0.01 -1.5" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
 
-                <!-- Другий слід (з'являється після кліку) -->
-               <a-image id="step1" class="step" width="1.0" height="1.0" position="0 0 0" visible="false"
-                         src="#footprint1-texture" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                
-                <a-text id="congratulations-text" value="ВІТАЮ!" position="0 0.2 -0.15" scale="0.1 0.1 0.1" rotation="-90 0 0" visible="false"
-                        color="#00ff00" align="center" font="#roboto-font" wrap-count="20"
-                        animation="property: scale; to: 0.15 0.15 0.15; dir: alternate; loop: true; dur: 800; startEvents: animate-congrats;">
+                <!-- Анімований текст "ВІТАЮ!" -->
+                <a-text id="congratulations-text" 
+                        value="ВІТАЮ!" 
+                        position="0 0.3 -0.75" 
+                        scale="0.12 0.12 0.12" 
+                        rotation="-90 0 0" 
+                        visible="false"
+                        color="#00ff00" 
+                        align="center" 
+                        font="#roboto-font" 
+                        wrap-count="12"
+                        animation__bounce="property: position; to: 0 0.45 -0.75; dur: 800; easing: easeInOutQuad; loop: true; dir: alternate"
+                        animation__pulse="property: scale; from: 0.12 0.12 0.12; to: 0.2 0.2 0.2; dur: 1000; easing: easeInOutSine; loop: true; dir: alternate">
                 </a-text>
             </a-entity>
         </a-entity>
 
-        <a-camera mindar-image-camera></a-camera>
+        <!-- Курсор для надійного кліку -->
+        <a-camera 
+            mindar-image-camera 
+            cursor="rayOrigin: mouse" 
+            raycaster="objects: .clickable">
+        </a-camera>
     </a-scene>
 
     <script>
@@ -70,48 +77,50 @@
             init: function() {
                 const target = this.el;
                 const container = document.getElementById('ar-game-container');
-                const step1 = document.getElementById('step1');
-                const step2 = document.getElementById('step2');
+                const steps = [
+                    document.getElementById('step1'),
+                    document.getElementById('step2'),
+                    document.getElementById('step3'),
+                    document.getElementById('step4'),
+                    document.getElementById('step5'),
+                    document.getElementById('step6')
+                ];
                 const congratsText = document.getElementById('congratulations-text');
 
                 // Завантаження текстур
-                const textures = ['footprint1-texture', 'footprint2-texture'];
-                textures.forEach(id => {
+                ['left-foot', 'right-foot'].forEach(id => {
                     const img = document.getElementById(id);
-                    img.addEventListener('load', () => console.log(`✅ Текстура ${id} завантажена`));
-                    img.addEventListener('error', () => console.error(`❌ Помилка завантаження ${id}`));
+                    img?.addEventListener('load', () => console.log(`✅ ${id} завантажено`));
+                    img?.addEventListener('error', () => console.error(`❌ ${id} не знайдено`));
                 });
 
-                // Поява/зникнення маркера
                 target.addEventListener('targetFound', () => {
-                    console.log('🟢 Ціль знайдено!');
                     document.getElementById('loader').style.display = 'none';
                     container.setAttribute('visible', true);
-                    step1.setAttribute('visible', true);
-                    step2.setAttribute('visible', false);
+                    steps[0].setAttribute('visible', true);
                     congratsText.setAttribute('visible', false);
                 });
 
                 target.addEventListener('targetLost', () => {
-                    console.log('🔴 Ціль втрачено!');
                     container.setAttribute('visible', false);
-                    step1.setAttribute('visible', false);
-                    step2.setAttribute('visible', false);
+                    steps.forEach(step => step.setAttribute('visible', false));
                     congratsText.setAttribute('visible', false);
                     document.getElementById('loader').style.display = 'block';
                 });
 
-                // 🔥 Клік на перший слід
-                step1.addEventListener('click', () => {
-                    console.log('👣 Клік по першому сліду — показуємо другий!');
-                    step2.setAttribute('visible', true);
-                    // Опціонально: показати текст "ВІТАЮ!"
-                    // congratsText.setAttribute('visible', true);
-                    // congratsText.emit('animate-congrats');
+                // Кліки: кожен слід показує наступний, останній — текст
+                steps.forEach((step, index) => {
+                    step.addEventListener('click', () => {
+                        step.setAttribute('visible', false);
+                        if (index < 5) {
+                            steps[index + 1].setAttribute('visible', true);
+                        } else {
+                            congratsText.setAttribute('visible', true);
+                        }
+                    });
                 });
             }
         });
     </script>
 </body>
 </html>
-
