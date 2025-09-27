@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>Відбитки </title>
+    <title>Відбитки</title>
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     <style>
@@ -36,45 +36,42 @@
             <a-asset-item id="roboto-font" src="https://cdn.aframe.io/fonts/Roboto-msdf.json"></a-asset-item>
         </a-assets>
 
+        <!-- Ambient light для емісивного матеріалу -->
+        <a-entity light="type: ambient; color: #FFF; intensity: 1"></a-entity>
+
         <a-entity mindar-image-target="targetIndex: 0" mindar-game-logic id="game-target">
             <a-entity id="ar-game-container" visible="false">
-                <!-- 6 слідів, лежать на підлозі, кожен на 30 см попереду -->
-                <a-image id="step1" class="step clickable" width="1.5" height="1.5" rotation="0 0 0" position="0 0 0.02" visible="false" src="#left-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step2" class="step clickable" width="1.5" height="1.5" rotation="0 0 0" position="0 0 -0.3" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step3" class="step clickable" width="1.5" height="1.5" rotation="0 0 0" position="0 0 -0.6" visible="false" src="#left-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step4" class="step clickable" width="1.5" height="1.5" rotation="0 0 0" position="0 0 -0.9" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step5" class="step clickable" width="1.5" height="1.5" rotation="0 0 0" position="0 0 -1.2" visible="false" src="#left-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step6" class="step clickable" width="1.5" height="1.5" rotation="0 0 0" position="0 0 -1.5" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <!-- 6 слідів -->
+                <a-image id="step1" class="step clickable" width="1.5" height="1.5" position="0 0 0.02" visible="false" src="#left-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step2" class="step clickable" width="1.5" height="1.5" position="0 0 -0.3" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step3" class="step clickable" width="1.5" height="1.5" position="0 0 -0.6" visible="false" src="#left-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step4" class="step clickable" width="1.5" height="1.5" position="0 0 -0.9" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step5" class="step clickable" width="1.5" height="1.5" position="0 0 -1.2" visible="false" src="#left-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-image id="step6" class="step clickable" width="1.5" height="1.5" position="0 0 -1.5" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
 
                 <!-- Анімований текст "ВІТАЮ!" -->
                 <a-text id="congratulations-text" 
                         value="ВІТАЮ!" 
-                        position="0 0.3 -0.75" 
-                        scale="0.12 0.12 0.12" 
-                        rotation="-90 0 0" 
+                        position="0 0.4 -0.75" 
+                        scale="0.15 0.15 0.15"
                         visible="false"
                         color="#00ff00" 
                         align="center" 
                         font="#roboto-font" 
                         wrap-count="12"
-                        animation__bounce="property: position; to: 0 0.45 -0.75; dur: 800; easing: easeInOutQuad; loop: true; dir: alternate"
-                        animation__pulse="property: scale; from: 0.12 0.12 0.12; to: 0.2 0.2 0.2; dur: 1000; easing: easeInOutSine; loop: true; dir: alternate">
+                        look-at="[mindar-image-camera]"
+                        animation__bounce="property: position; to: 0 0.55 -0.75; dur: 800; easing: easeInOutQuad; loop: true; dir: alternate"
+                        animation__pulse="property: scale; from: 0.15 0.15 0.15; to: 0.25 0.25 0.25; dur: 1000; easing: easeInOutSine; loop: true; dir: alternate">
                 </a-text>
             </a-entity>
         </a-entity>
 
-        <!-- Камера з курсором + візуальний курсор -->
-        <a-camera 
-            mindar-image-camera 
-            cursor="rayOrigin: mouse" 
-            raycaster="objects: .clickable; far: 10">
-            <!-- Візуальний курсор (кружечок) -->
-            <a-entity 
-                cursor="fuse: false; rayOrigin: mouse"
-                position="0 0 -1"
-                geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-                material="color: #00ff00; shader: flat"
-                visible="true">
+        <!-- Камера з fuse-курсором -->
+        <a-camera mindar-image-camera>
+            <a-entity cursor="fuse: true; fuseTimeout: 500"
+                      position="0 0 -1"
+                      geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                      material="color: #00ff00; shader: flat">
             </a-entity>
         </a-camera>
     </a-scene>
@@ -104,7 +101,6 @@
                     }
                 });
 
-                // Маркер знайдено
                 target.addEventListener('targetFound', () => {
                     console.log('🟢 Маркер знайдено!');
                     document.getElementById('loader').style.display = 'none';
@@ -113,7 +109,6 @@
                     congratsText.setAttribute('visible', false);
                 });
 
-                // Маркер втрачено — ховаємо ТІЛЬКИ якщо гра ще не почалася
                 target.addEventListener('targetLost', () => {
                     if (!gameStarted) {
                         console.log('🔴 Маркер втрачено — ховаємо сліди');
@@ -126,7 +121,6 @@
                     }
                 });
 
-                // Обробка кліків по слідах
                 steps.forEach((step, index) => {
                     step.addEventListener('click', () => {
                         console.log(`👣 Клік по сліду ${index + 1}`);
