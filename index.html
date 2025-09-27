@@ -36,20 +36,36 @@
             <a-asset-item id="roboto-font" src="https://cdn.aframe.io/fonts/Roboto-msdf.json"></a-asset-item>
         </a-assets>
 
-        <!-- Ambient light для коректного відображення емісивного кольору -->
+        <!-- Ambient light -->
         <a-entity light="type: ambient; color: #FFF; intensity: 1"></a-entity>
 
         <a-entity mindar-image-target="targetIndex: 0" mindar-game-logic id="game-target">
             <a-entity id="ar-game-container" visible="false">
-                <!-- 6 слідів -->
-                <a-image id="step1" class="step clickable" width="1.5" height="1.5" position="0 0 0.02" visible="false" src="#left-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step2" class="step clickable" width="1.5" height="1.5" position="0 0 -0.3" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step3" class="step clickable" width="1.5" height="1.5" position="0 0 -0.6" visible="false" src="#left-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step4" class="step clickable" width="1.5" height="1.5" position="0 0 -0.9" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step5" class="step clickable" width="1.5" height="1.5" position="0 0 -1.2" visible="false" src="#left-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
-                <a-image id="step6" class="step clickable" width="1.5" height="1.5" position="0 0 -1.5" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <!-- Step 1 -->
+                <a-image width="1.5" height="1.5" position="0 0 0.02" visible="false" src="#left-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-plane id="step1" class="step clickable" width="1.5" height="1.5" position="0 0.01 0.02" visible="false" material="transparent: true; opacity: 0; shader: flat; depthWrite: false; side: double"></a-plane>
 
-                <!-- Анімований текст "ВІТАЮ!" -->
+                <!-- Step 2 -->
+                <a-image width="1.5" height="1.5" position="0 0 -0.3" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-plane id="step2" class="step clickable" width="1.5" height="1.5" position="0 0.01 -0.3" visible="false" material="transparent: true; opacity: 0; shader: flat; depthWrite: false; side: double"></a-plane>
+
+                <!-- Step 3 -->
+                <a-image width="1.5" height="1.5" position="0 0 -0.6" visible="false" src="#left-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-plane id="step3" class="step clickable" width="1.5" height="1.5" position="0 0.01 -0.6" visible="false" material="transparent: true; opacity: 0; shader: flat; depthWrite: false; side: double"></a-plane>
+
+                <!-- Step 4 -->
+                <a-image width="1.5" height="1.5" position="0 0 -0.9" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-plane id="step4" class="step clickable" width="1.5" height="1.5" position="0 0.01 -0.9" visible="false" material="transparent: true; opacity: 0; shader: flat; depthWrite: false; side: double"></a-plane>
+
+                <!-- Step 5 -->
+                <a-image width="1.5" height="1.5" position="0 0 -1.2" visible="false" src="#left-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-plane id="step5" class="step clickable" width="1.5" height="1.5" position="0 0.01 -1.2" visible="false" material="transparent: true; opacity: 0; shader: flat; depthWrite: false; side: double"></a-plane>
+
+                <!-- Step 6 -->
+                <a-image width="1.5" height="1.5" position="0 0 -1.5" visible="false" src="#right-foot" material="transparent: true; alphaTest: 0.5; shader: standard; emissive: #00ff00; emissiveIntensity: 0.8;"></a-image>
+                <a-plane id="step6" class="step clickable" width="1.5" height="1.5" position="0 0.01 -1.5" visible="false" material="transparent: true; opacity: 0; shader: flat; depthWrite: false; side: double"></a-plane>
+
+                <!-- Congratulations text -->
                 <a-text id="congratulations-text" 
                         value="ВІТАЮ!" 
                         position="0 0.4 -0.75" 
@@ -66,7 +82,7 @@
             </a-entity>
         </a-entity>
 
-        <!-- Камера з raycaster + fuse-курсором -->
+        <!-- Camera with raycaster + fuse cursor -->
         <a-camera 
             mindar-image-camera
             raycaster="objects: .clickable; far: 10; interval: 100">
@@ -115,7 +131,7 @@
                     }
                 });
 
-                // Обробка кліків по слідах
+                // Обробка кліків (через fuse-курсор)
                 steps.forEach((step, index) => {
                     if (!step) return;
                     step.addEventListener('click', () => {
