@@ -67,13 +67,16 @@
         </a-entity>
 
         <!-- Камера з fuse-курсором -->
-        <a-camera mindar-image-camera>
-            <a-entity cursor="fuse: true; fuseTimeout: 500"
-                      position="0 0 -1"
-                      geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-                      material="color: #00ff00; shader: flat">
-            </a-entity>
-        </a-camera>
+<a-camera 
+    mindar-image-camera
+    raycaster="objects: .clickable; far: 10; interval: 100">
+    <a-entity 
+        cursor="fuse: true; fuseTimeout: 500"
+        position="0 0 -1"
+        geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+        material="color: #00ff00; shader: flat">
+    </a-entity>
+</a-camera>
     </a-scene>
 
     <script>
@@ -140,5 +143,6 @@
     </script>
 </body>
 </html>
+
 
 
