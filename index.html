@@ -36,7 +36,7 @@
             <a-asset-item id="roboto-font" src="https://cdn.aframe.io/fonts/Roboto-msdf.json"></a-asset-item>
         </a-assets>
 
-        <!-- Ambient light для емісивного матеріалу -->
+        <!-- Ambient light для коректного відображення емісивного кольору -->
         <a-entity light="type: ambient; color: #FFF; intensity: 1"></a-entity>
 
         <a-entity mindar-image-target="targetIndex: 0" mindar-game-logic id="game-target">
@@ -66,23 +66,22 @@
             </a-entity>
         </a-entity>
 
-        <!-- Камера з fuse-курсором -->
-<a-camera 
-    mindar-image-camera
-    raycaster="objects: .clickable; far: 10; interval: 100">
-    <a-entity 
-        cursor="fuse: true; fuseTimeout: 500"
-        position="0 0 -1"
-        geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-        material="color: #00ff00; shader: flat">
-    </a-entity>
-</a-camera>
+        <!-- Камера з raycaster + fuse-курсором -->
+        <a-camera 
+            mindar-image-camera
+            raycaster="objects: .clickable; far: 10; interval: 100">
+            <a-entity 
+                cursor="fuse: true; fuseTimeout: 500"
+                position="0 0 -1"
+                geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                material="color: #00ff00; shader: flat">
+            </a-entity>
+        </a-camera>
     </a-scene>
 
     <script>
         AFRAME.registerComponent('mindar-game-logic', {
             init: function() {
-                const target = this.el;
                 const container = document.getElementById('ar-game-container');
                 const steps = [
                     document.getElementById('step1'),
@@ -95,16 +94,8 @@
                 const congratsText = document.getElementById('congratulations-text');
                 let gameStarted = false;
 
-                // Завантаження текстур
-                ['left-foot', 'right-foot'].forEach(id => {
-                    const img = document.getElementById(id);
-                    if (img) {
-                        img.addEventListener('load', () => console.log(`✅ ${id} завантажено`));
-                        img.addEventListener('error', () => console.error(`❌ ${id} не знайдено`));
-                    }
-                });
-
-                target.addEventListener('targetFound', () => {
+                // Обробка подій маркера
+                this.el.addEventListener('targetFound', () => {
                     console.log('🟢 Маркер знайдено!');
                     document.getElementById('loader').style.display = 'none';
                     container.setAttribute('visible', true);
@@ -112,7 +103,7 @@
                     congratsText.setAttribute('visible', false);
                 });
 
-                target.addEventListener('targetLost', () => {
+                this.el.addEventListener('targetLost', () => {
                     if (!gameStarted) {
                         console.log('🔴 Маркер втрачено — ховаємо сліди');
                         container.setAttribute('visible', false);
@@ -124,12 +115,12 @@
                     }
                 });
 
+                // Обробка кліків по слідах
                 steps.forEach((step, index) => {
+                    if (!step) return;
                     step.addEventListener('click', () => {
                         console.log(`👣 Клік по сліду ${index + 1}`);
-                        if (!gameStarted) {
-                            gameStarted = true;
-                        }
+                        if (!gameStarted) gameStarted = true;
                         step.setAttribute('visible', false);
                         if (index < 5) {
                             steps[index + 1].setAttribute('visible', true);
@@ -143,6 +134,3 @@
     </script>
 </body>
 </html>
-
-
-
